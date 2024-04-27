@@ -19,6 +19,8 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -61,4 +63,20 @@ class HotelServiceApplicationTests {
                 .build();
     }
 
+//    @Test
+//    void shouldSortHotelListByStar() throws Exception {
+//        HotelRequest hotelRequest = getHotelRequest();
+//        String hotelRequestString = objectMapper.writeValueAsString(hotelRequest);
+//
+//        mockMvc.perform(MockMvcRequestBuilders.get("api/hotel")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(hotelRequestString))
+//                .andExpect(status().isOk());
+//        Assertions.
+//    }
+//
+//    private List<HotelRequest> sortHotelListByStar() {
+//        return
+//
+//    }
 }

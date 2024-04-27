@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,20 @@ public class HotelService {
         return hotels.stream().map(this::mapToHotelResponse).toList();
     }
 
+    public List<HotelResponse> sortByStarDesc() {
+        List<Hotel> hotels = hotelRepository.findAll();
+        hotels.sort(Comparator.comparingInt(Hotel::getStar).reversed());
+
+        return hotels.stream().map(this::mapToHotelResponse).toList();
+    }
+
+    public List<HotelResponse> sortByStarInc() {
+        List<Hotel> hotels = hotelRepository.findAll();
+        hotels.sort(Comparator.comparingInt(Hotel::getStar));
+
+        return hotels.stream().map(this::mapToHotelResponse).toList();
+    }
+
     private HotelResponse mapToHotelResponse(Hotel hotel) {
         return HotelResponse.builder()
                 .id(hotel.getId())
@@ -43,5 +59,35 @@ public class HotelService {
                 .star(hotel.getStar())
                 .description(hotel.getDescription())
                 .build();
+    }
+
+    public List<HotelResponse> filterByFiveStar() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        return hotels.stream().filter(x -> x.getStar() == 5).map(this::mapToHotelResponse).collect(Collectors.toList());
+    }
+
+    public List<HotelResponse> filterByFourStar() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        return hotels.stream().filter(x -> x.getStar() == 4).map(this::mapToHotelResponse).collect(Collectors.toList());
+    }
+
+    public List<HotelResponse> filterByThreeStar() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        return hotels.stream().filter(x -> x.getStar() == 3).map(this::mapToHotelResponse).collect(Collectors.toList());
+    }
+
+    public List<HotelResponse> filterByTwoStar() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        return hotels.stream().filter(x -> x.getStar() == 2).map(this::mapToHotelResponse).collect(Collectors.toList());
+    }
+
+    public List<HotelResponse> filterByOneStar() {
+        List<Hotel> hotels = hotelRepository.findAll();
+
+        return hotels.stream().filter(x -> x.getStar() == 1).map(this::mapToHotelResponse).collect(Collectors.toList());
     }
 }
