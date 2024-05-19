@@ -11,8 +11,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HotelResponse {
     private String id;
-    private String name;
+    private String hotelName;
     private String address;
     private Integer star;
     private String description;
+    private String image;
+    private String city;
+    private String province;
+    private Float ratingScore;
+    private Integer numOfReviews;
+    private Float discount;
+    private Double oldPrice;
+    private Double newPrice;
+    private Double totalPrice;
 }

@@ -55,4 +55,13 @@ public class HotelController {
     @GetMapping(path = "/filterByOneStar")
     @ResponseStatus(HttpStatus.OK)
     public List<HotelResponse> filterByOneStar() { return hotelService.filterByOneStar(); }
+
+    @GetMapping(path = "/searchResult")
+    @ResponseStatus(HttpStatus.OK)
+    public List<HotelResponse> search(@RequestParam String query){
+        return hotelService.search(query);
+    }
+
+
+
 }

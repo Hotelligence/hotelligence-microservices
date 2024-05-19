@@ -21,10 +21,19 @@ public class HotelService {
 
     public void createHotel(HotelRequest hotelRequest) {
         Hotel hotel = Hotel.builder()
-                .name(hotelRequest.getName())
+                .hotelName(hotelRequest.getHotelName())
                 .address(hotelRequest.getAddress())
                 .star(hotelRequest.getStar())
                 .description(hotelRequest.getDescription())
+                .image(hotelRequest.getImage())
+                .city(hotelRequest.getCity())
+                .province(hotelRequest.getProvince())
+                .ratingScore(hotelRequest.getRatingScore())
+                .numOfReviews(hotelRequest.getNumOfReviews())
+                .discount(hotelRequest.getDiscount())
+                .oldPrice(hotelRequest.getOldPrice())
+                .newPrice(hotelRequest.getNewPrice())
+                .totalPrice(hotelRequest.getTotalPrice())
                 .build();
 
         hotelRepository.save(hotel);
@@ -54,10 +63,19 @@ public class HotelService {
     private HotelResponse mapToHotelResponse(Hotel hotel) {
         return HotelResponse.builder()
                 .id(hotel.getId())
-                .name(hotel.getName())
+                .hotelName(hotel.getHotelName())
                 .address(hotel.getAddress())
                 .star(hotel.getStar())
                 .description(hotel.getDescription())
+                .image(hotel.getImage())
+                .city(hotel.getCity())
+                .province(hotel.getProvince())
+                .ratingScore(hotel.getRatingScore())
+                .numOfReviews(hotel.getNumOfReviews())
+                .discount(hotel.getDiscount())
+                .oldPrice(hotel.getOldPrice())
+                .newPrice(hotel.getNewPrice())
+                .totalPrice(hotel.getTotalPrice())
                 .build();
     }
 
@@ -89,5 +107,16 @@ public class HotelService {
         List<Hotel> hotels = hotelRepository.findAll();
 
         return hotels.stream().filter(x -> x.getStar() == 1).map(this::mapToHotelResponse).collect(Collectors.toList());
+    }
+
+    public List<HotelResponse> search(String query) {
+        return hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
+    }
+
+    public List<HotelResponse> sortByPriceDesc() {
+        List<Hotel> hotels = hotelRepository.findAll();
+        hotels.sort(Comparator.comparingDouble(Hotel::getTotalPrice).reversed());
+
+        return hotels.stream().map(this::mapToHotelResponse).toList();
     }
 }

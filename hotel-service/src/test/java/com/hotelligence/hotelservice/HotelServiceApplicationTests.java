@@ -47,7 +47,7 @@ class HotelServiceApplicationTests {
         HotelRequest hotelRequest = getHotelRequest();
         String hotelRequestString = objectMapper.writeValueAsString(hotelRequest);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/hotel")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelRequestString))
                 .andExpect(status().isCreated());
@@ -56,10 +56,18 @@ class HotelServiceApplicationTests {
 
     private HotelRequest getHotelRequest() {
         return HotelRequest.builder()
-                .name("Fusion Suites")
+                .hotelName("Fusion Suites")
                 .address("2 Trương Công Định")
                 .star(4)
                 .description("Khách sạn gần biển")
+                .city("Vũng Tàu")
+                .province("Bà Rịa - Vũng Tàu")
+                .ratingScore(8.8F)
+                .numOfReviews(4)
+                .discount(0.5F)
+                .oldPrice(600000D)
+                .newPrice(300000D)
+                .totalPrice(300000D)
                 .build();
     }
 
