@@ -1,49 +1,55 @@
 package com.hotelligence.bookingservice.service;
 
-import com.hotelligence.bookingservice.dto.BookingLineItemsDto;
 import com.hotelligence.bookingservice.dto.BookingRequest;
+import com.hotelligence.bookingservice.dto.BookingResponse;
 import com.hotelligence.bookingservice.model.Booking;
-import com.hotelligence.bookingservice.model.BookingLineItems;
 import com.hotelligence.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingService {
 
     private final BookingRepository bookingRepository;
 
-    public void placeBooking(BookingRequest bookingRequest){
-        Booking booking = new Booking();
-        booking.setBookingNumber(UUID.randomUUID().toString());
-
-        List<BookingLineItems> bookingLineItems = bookingRequest.getBookingLineItemsDtoList()
-                .stream()
-                .map(this::mapToDto)
-                .toList();
-
-        booking.setBookingLineItemsList(bookingLineItems);
+    public void createBooking(BookingRequest bookingRequest) {
+        Booking booking = Booking.builder()
+                .roomId(bookingRequest.getRoomId())
+                .bookingDate(bookingRequest.getBookingDate())
+                .checkinDate(bookingRequest.getCheckinDate())
+                .checkoutDate(bookingRequest.getCheckoutDate())
+                .bookingStatus(bookingRequest.getBookingStatus())
+                .cancelDue(bookingRequest.getCancelDue())
+                .unCancelDue(bookingRequest.getUnCancelDue())
+                .build();
 
         bookingRepository.save(booking);
+        log.info("Booking {} is saved", booking.getId());
     }
 
-    private BookingLineItems mapToDto(BookingLineItemsDto bookingLineItemsDto) {
-        BookingLineItems bookingLineItems = new BookingLineItems();
-        bookingLineItems.setCheckinDate(bookingLineItemsDto.getCheckinDate());
-        bookingLineItems.setCheckoutDate(bookingLineItemsDto.getCheckoutDate());
-        bookingLineItems.setNightlyPrice(bookingLineItemsDto.getNightlyPrice());
-        bookingLineItems.setNumOfNights(bookingLineItemsDto.getNumOfNights());
-        bookingLineItems.setTax(bookingLineItemsDto.getTax());
-        bookingLineItems.setExtraFee(bookingLineItemsDto.getExtraFee());
-        bookingLineItems.setTotalPrice(bookingLineItemsDto.getTotalPrice());
-        bookingLineItems.setBookingStatus(bookingLineItemsDto.getBookingStatus());
-        return bookingLineItems;
+    public List<BookingResponse> getAllBookings() {
+        List<Booking> bookings = bookingRepository.findAll();
+
+        return bookings.stream().map(this::mapToBookingResponse).toList();
     }
 
+    private BookingResponse mapToBookingResponse(Booking booking) {
+        return BookingResponse.builder()
+                .id(booking.getId())
+                .roomId(booking.getRoomId())
+                .bookingDate(booking.getBookingDate())
+                .checkinDate(booking.getCheckinDate())
+                .checkoutDate(booking.getCheckoutDate())
+                .bookingStatus(booking.getBookingStatus())
+                .cancelDue(booking.getCancelDue())
+                .unCancelDue(booking.getUnCancelDue())
+                .build();
+    }
 }

@@ -61,7 +61,4 @@ public class HotelController {
     public List<HotelResponse> search(@RequestParam String query){
         return hotelService.search(query);
     }
-
-
-
 }
