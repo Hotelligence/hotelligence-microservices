@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -14,13 +16,17 @@ public class HotelRequest {
     private String address;
     private Integer star;
     private String description;
-    private String image;
+    private List<String> images;
     private String city;
     private String province;
-    private Float ratingScore;
+    private Double ratingScore;
+    private String ratingCategory;
     private Integer numOfReviews;
-    private Float discount;
-    private Double oldPrice;
-    private Double newPrice;
-    private Double totalPrice;
+    private Integer originPrice;
+    private Double discount;
+    private Integer discountPrice;
+    private Double taxPercentage;
+    private Integer taxPrice;
+    private Integer extraFee;
+    private Integer totalPrice;
 }
