@@ -62,29 +62,15 @@ class HotelServiceApplicationTests {
                 .description("Khách sạn gần biển")
                 .city("Vũng Tàu")
                 .province("Bà Rịa - Vũng Tàu")
-                .ratingScore(8.8F)
+                .ratingScore(8.8D)
                 .numOfReviews(4)
-                .discount(0.5F)
-                .oldPrice(600000D)
-                .newPrice(300000D)
-                .totalPrice(300000D)
+                .originPrice(600000)
+                .discount(0.5D)
+                .discountPrice(300000)
+                .taxPercentage(0.1D)
+                .taxPrice(30000)
+                .extraFee(0)
+                .totalPrice(300000)
                 .build();
     }
-
-//    @Test
-//    void shouldSortHotelListByStar() throws Exception {
-//        HotelRequest hotelRequest = getHotelRequest();
-//        String hotelRequestString = objectMapper.writeValueAsString(hotelRequest);
-//
-//        mockMvc.perform(MockMvcRequestBuilders.get("api/hotel")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(hotelRequestString))
-//                .andExpect(status().isOk());
-//        Assertions.
-//    }
-//
-//    private List<HotelRequest> sortHotelListByStar() {
-//        return
-//
-//    }
 }
