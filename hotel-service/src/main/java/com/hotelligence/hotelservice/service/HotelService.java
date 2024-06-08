@@ -2,11 +2,13 @@ package com.hotelligence.hotelservice.service;
 
 import com.hotelligence.hotelservice.dto.HotelRequest;
 import com.hotelligence.hotelservice.dto.HotelResponse;
+import com.hotelligence.hotelservice.dto.RoomResponse;
 import com.hotelligence.hotelservice.model.Hotel;
 import com.hotelligence.hotelservice.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class HotelService {
 
     private final HotelRepository hotelRepository;
+    private final WebClient.Builder webClient;
 
     public void createHotel(HotelRequest hotelRequest) {
         Hotel hotel = Hotel.builder()
@@ -40,6 +43,12 @@ public class HotelService {
                 .totalPrice(hotelRequest.getTotalPrice())
                 .build();
 
+//        webClient.get()
+//                .uri("http://localhost:8080/api/hotels")
+//                .retrieve()
+//                .bodyToMono(Hotel.class)
+//                .block();
+
         hotelRepository.save(hotel);
         log.info("Hotel {} is saved", hotel.getId());
     }
@@ -49,6 +58,14 @@ public class HotelService {
 
         return hotels.stream().map(this::mapToHotelResponse).toList();
     }
+
+    public HotelResponse getHotelById(String hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId).
+                orElseThrow(() -> new IllegalArgumentException("Hotel with id " + hotelId + " does not exist"));
+
+        return mapToHotelResponse(hotel);
+    }
+
 
     public List<HotelResponse> sortByStarDesc() {
         List<Hotel> hotels = hotelRepository.findAll();

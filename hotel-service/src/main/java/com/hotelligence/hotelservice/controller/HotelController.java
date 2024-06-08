@@ -28,6 +28,12 @@ public class HotelController {
         return hotelService.getAllHotels();
     }
 
+    @GetMapping(path = "/getHotelById/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public HotelResponse getHotelById(@PathVariable("id") String hotelId){
+        return hotelService.getHotelById(hotelId);
+    }
+
     @GetMapping(path = "/sortByStarDesc")
     @ResponseStatus(HttpStatus.OK)
     public List<HotelResponse> sortByStarDesc() { return hotelService.sortByStarDesc(); }

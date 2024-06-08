@@ -1,11 +1,15 @@
 package com.hotelligence.hotelservice.dto;
 
+import com.hotelligence.hotelservice.model.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -17,17 +21,29 @@ public class RoomResponse {
     private String image;
     private String roomName;
     private String roomType;
-    private Double nightlyPrice;
+    private Integer nightlyPrice;
     private Integer numOfBeds;
     private Integer numOfGuests;
     private String description;
-    private Array amenities;
-    private Double breakfastPrice;
-    private Double breakfastFor2Price;
+    private ArrayList<String> amenities;
+    private Integer breakfastPrice;
+    private Integer breakfastFor2Price;
     private Double discount;
-    private Double oldPrice;
-    private Double newPrice;
-    private Double totalPrice;
-    private String status;
+    private Integer numOfRooms;
+    private Integer originPrice;
+    private Double taxPercentage;
+    private Integer tax;
+    private Integer extraFee;
+    private Integer discountPrice;
+    private Integer totalPrice;
+    private ArrayList<Room.AvailableDate> availableDates;
 
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class AvailableDate {
+        private LocalDateTime from;
+        private LocalDateTime to;
+    }
 }
