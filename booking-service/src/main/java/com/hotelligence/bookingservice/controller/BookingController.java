@@ -17,10 +17,11 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    @PostMapping
+    @PostMapping(path = "/placeBooking/{roomId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createBooking(@RequestBody BookingRequest bookingRequest){
-        bookingService.createBooking(bookingRequest);
+    public void placeBooking(@PathVariable("roomId") String roomId,@RequestBody BookingRequest bookingRequest){
+        bookingService.placeBooking(roomId, bookingRequest);
+
     }
 
     @GetMapping(path = "/getAll")

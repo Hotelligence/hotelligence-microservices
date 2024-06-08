@@ -53,7 +53,8 @@ class BookingServiceApplicationTests {
         String cancelDueString = "2024-05-28T10:03:46.000+00:00";
         String unCancelDueString = "2024-05-30T10:03:46.000+00:00";
 
-        // Use a formatter to parse the strings into LocalDateTime objects
+        // Use a formatter to
+        // parse the strings into LocalDateTime objects
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
         LocalDateTime checkinDate = LocalDateTime.parse(checkinDateString, formatter);

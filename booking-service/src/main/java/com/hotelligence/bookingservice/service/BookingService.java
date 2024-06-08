@@ -7,10 +7,12 @@ import com.hotelligence.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -18,20 +20,22 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final WebClient.Builder webClient;
 
-    public void createBooking(BookingRequest bookingRequest) {
-        Booking booking = Booking.builder()
-                .roomId(bookingRequest.getRoomId())
-                .bookingDate(bookingRequest.getBookingDate())
-                .checkinDate(bookingRequest.getCheckinDate())
-                .checkoutDate(bookingRequest.getCheckoutDate())
-                .bookingStatus(bookingRequest.getBookingStatus())
-                .cancelDue(bookingRequest.getCancelDue())
-                .unCancelDue(bookingRequest.getUnCancelDue())
-                .build();
+
+    public void placeBooking(String roomId, BookingRequest bookingRequest) {
+        Booking booking = new Booking();
+        booking.setRoomId(roomId);
+        booking.setBookingDate(LocalDateTime.now());
+        booking.setCheckinDate(bookingRequest.getCheckinDate());
+        booking.setCheckoutDate(bookingRequest.getCheckoutDate());
+        booking.setBookingStatus(bookingRequest.getBookingStatus());
+        booking.setCancelDue(bookingRequest.getCancelDue());
+        booking.setUnCancelDue(bookingRequest.getUnCancelDue());
 
         bookingRepository.save(booking);
-        log.info("Booking {} is saved", booking.getId());
+
+        log.info("Place booking successfully");
     }
 
     public List<BookingResponse> getAllBookings() {
@@ -39,6 +43,22 @@ public class BookingService {
 
         return bookings.stream().map(this::mapToBookingResponse).toList();
     }
+
+    public BookingResponse getBookingById(String bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking with id " + bookingId + " does not exist"));
+
+        return mapToBookingResponse(booking);
+    }
+
+    public List<BookingResponse> getBookingsByRoomId(String roomId) {
+        List<Booking> bookings = bookingRepository.findByRoomId(roomId);
+
+        return bookings.stream().map(this::mapToBookingResponse).toList();
+    }
+
+
+
 
     private BookingResponse mapToBookingResponse(Booking booking) {
         return BookingResponse.builder()
