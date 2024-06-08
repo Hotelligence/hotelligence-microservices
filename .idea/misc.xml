@@ -6,7 +6,25 @@
       <list>
         <option value="$PROJECT_DIR$/hotel-service/pom.xml" />
         <option value="$PROJECT_DIR$/booking-service/pom.xml" />
+        <option value="$PROJECT_DIR$/discovery-server/pom.xml" />
+        <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/proto/pom.xml" />
+        <option value="$PROJECT_DIR$/grpc-server/pom.xml" />
+        <option value="$PROJECT_DIR$/client-service/pom.xml" />
+        <option value="$PROJECT_DIR$/grpc/pom.xml" />
+        <option value="$PROJECT_DIR$/grpc-service/pom.xml" />
+        <option value="$PROJECT_DIR$/hotel-service-grpc/pom.xml" />
+        <option value="$PROJECT_DIR$/hotel-service-proto/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/client-service/pom.xml" />
+        <option value="$PROJECT_DIR$/grpc-server/pom.xml" />
+        <option value="$PROJECT_DIR$/grpc-service/pom.xml" />
+        <option value="$PROJECT_DIR$/grpc/pom.xml" />
+        <option value="$PROJECT_DIR$/proto/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="liberica-21" project-jdk-type="JavaSDK">
