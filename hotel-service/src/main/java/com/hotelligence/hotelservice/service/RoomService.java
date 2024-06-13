@@ -21,13 +21,9 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
 
-    public void createRoom(RoomRequest roomRequest) {
-        if (!hotelRepository.existsById(roomRequest.getHotelId())) {
-            throw new IllegalArgumentException("Hotel with id " + roomRequest.getHotelId() + " does not exist");
-        }
-
+    public void createRoom(String hotelId, RoomRequest roomRequest) {
         Room room = Room.builder()
-                .hotelId(roomRequest.getHotelId())
+                .hotelId(hotelId)
                 .image(roomRequest.getImage())
                 .roomName(roomRequest.getRoomName())
                 .roomType(roomRequest.getRoomType())

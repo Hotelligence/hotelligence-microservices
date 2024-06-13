@@ -50,4 +50,16 @@ public class Room {
         private LocalDateTime from;
         private LocalDateTime to;
     }
+
+    public Integer getDiscountPrice() {
+        return (int) (originPrice * (1 - discount));
+    }
+
+    public Integer getTaxPrice() {
+        return (int) (getDiscountPrice() * (1 + taxPercentage));
+    }
+
+    public Integer getTotalPrice() {
+        return getDiscountPrice() + getTaxPrice() + extraFee;
+    }
 }

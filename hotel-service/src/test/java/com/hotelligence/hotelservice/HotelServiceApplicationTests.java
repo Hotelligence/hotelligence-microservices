@@ -63,6 +63,7 @@ class HotelServiceApplicationTests {
                 .city("Vũng Tàu")
                 .province("Bà Rịa - Vũng Tàu")
                 .ratingScore(8.8D)
+                .ratingCategory("Tuyệt vời")
                 .numOfReviews(4)
                 .originPrice(600000)
                 .discount(0.5D)

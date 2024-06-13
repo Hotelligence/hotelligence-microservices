@@ -1,9 +1,6 @@
 package com.hotelligence.hotelservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,14 +21,15 @@ public class Hotel {
     private List<String> images;
     private String city;
     private String province;
-    private Double ratingScore;
-    private String ratingCategory;
-    private Integer numOfReviews;
-    private Integer originPrice;
-    private Double discount;
-    private Integer discountPrice;
-    private Double taxPercentage;
-    private Integer taxPrice;
-    private Integer extraFee;
-    private Integer totalPrice;
+//    private Double ratingScore;
+//    private String ratingCategory;
+//    private Integer numOfReviews;
+//    private Integer originPrice;
+//    private Double discount;
+//    private Integer discountPrice;
+//    private Double taxPercentage;
+//    private Integer taxPrice;
+//    private Integer extraFee;
+//    private Integer totalPrice;
+
 }

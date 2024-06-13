@@ -17,10 +17,10 @@ public class RoomController {
 
     private final RoomService roomService;
 
-    @PostMapping
+    @PostMapping(path = "createRoom/{hotelId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createRoom(@RequestBody RoomRequest roomRequest){
-        roomService.createRoom(roomRequest);
+    public void createRoom(@PathVariable String hotelId, @RequestBody RoomRequest roomRequest){
+        roomService.createRoom(hotelId, roomRequest);
     }
 
     @GetMapping(path = "/getAll")
