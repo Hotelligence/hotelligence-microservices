@@ -7,12 +7,10 @@ import com.hotelligence.bookingservice.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +23,13 @@ public class BookingService {
 
     public void placeBooking(String roomId, BookingRequest bookingRequest) {
         Booking booking = new Booking();
+        booking.setUserId(bookingRequest.getUserId());
         booking.setRoomId(roomId);
-        booking.setBookingDate(LocalDateTime.now());
+        booking.setFullName(bookingRequest.getFullName());
+        booking.setEmail(bookingRequest.getEmail());
+        booking.setPhoneNumber(bookingRequest.getPhoneNumber());
+        booking.setPaymentMethod(bookingRequest.getPaymentMethod());
+        booking.setBookingDate(bookingRequest.getBookingDate());
         booking.setCheckinDate(bookingRequest.getCheckinDate());
         booking.setCheckoutDate(bookingRequest.getCheckoutDate());
         booking.setBookingStatus(bookingRequest.getBookingStatus());
@@ -57,13 +60,15 @@ public class BookingService {
         return bookings.stream().map(this::mapToBookingResponse).toList();
     }
 
-
-
-
     private BookingResponse mapToBookingResponse(Booking booking) {
         return BookingResponse.builder()
                 .id(booking.getId())
+                .userId(booking.getUserId())
                 .roomId(booking.getRoomId())
+                .fullName(booking.getFullName())
+                .email(booking.getEmail())
+                .phoneNumber(booking.getPhoneNumber())
+                .paymentMethod(booking.getPaymentMethod())
                 .bookingDate(booking.getBookingDate())
                 .checkinDate(booking.getCheckinDate())
                 .checkoutDate(booking.getCheckoutDate())
@@ -71,5 +76,32 @@ public class BookingService {
                 .cancelDue(booking.getCancelDue())
                 .unCancelDue(booking.getUnCancelDue())
                 .build();
+    }
+
+    public List<BookingResponse> getBookingsByUserId(String userId) {
+        List<Booking> bookings = bookingRepository.findByUserId(userId);
+
+        return bookings.stream().map(this::mapToBookingResponse).toList();
+    }
+
+    @Transactional
+    public BookingResponse updateBookingStatus(String bookingId, BookingRequest bookingRequest) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking with id " + bookingId + " does not exist"));
+
+        booking.setBookingStatus(bookingRequest.getBookingStatus());
+        bookingRepository.save(booking);
+        return mapToBookingResponse(booking);
+    }
+
+    @Transactional
+    public BookingResponse cancelBooking(String bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking with id " + bookingId + " does not exist"));
+
+
+        booking.setBookingStatus("Đã hủy");
+        bookingRepository.save(booking);
+        return mapToBookingResponse(booking);
     }
 }
