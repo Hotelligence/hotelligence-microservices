@@ -20,14 +20,14 @@ public class HotelResponse {
     private List<String> images;
     private String city;
     private String province;
-//    private Double ratingScore;
-//    private String ratingCategory;
-//    private Integer numOfReviews;
-//    private Integer originPrice;
-//    private Double discount;
-//    private Integer discountPrice;
-//    private Double taxPercentage;
-//    private Integer taxPrice;
-//    private Integer extraFee;
-//    private Integer totalPrice;
+    private Double ratingScore;
+    private String ratingCategory;
+    private Integer numOfReviews;
+    private Integer originPrice;
+    private Double discount;
+    private Integer discountPrice;
+    private Double taxPercentage;
+    private Integer taxPrice;
+    private Integer extraFee;
+    private Integer totalPrice;
 }

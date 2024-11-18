@@ -36,7 +36,13 @@ public class HotelController {
 
     @GetMapping(path = "/searchResult")
     @ResponseStatus(HttpStatus.OK)
-    public List<HotelResponse> search(@RequestParam String query){
-        return hotelService.search(query);
+    public List<HotelResponse> search(@RequestParam String query,
+                                      @RequestParam(required = false) String sortBy,
+                                      @RequestParam(required = false) String sortOrder,
+                                      @RequestParam(required = false) Integer minPrice,
+                                      @RequestParam(required = false) Integer maxPrice,
+                                      @RequestParam(required = false) Integer minRatingScore,
+                                      @RequestParam(required = false) List<Integer> stars) {
+        return hotelService.search(query, sortBy, sortOrder, minPrice, maxPrice, minRatingScore, stars);
     }
 }

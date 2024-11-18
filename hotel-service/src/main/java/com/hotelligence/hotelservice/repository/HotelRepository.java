@@ -12,5 +12,9 @@ import java.util.Optional;
 public interface HotelRepository extends MongoRepository<Hotel, String> {
     List<HotelResponse> findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(String hotelName, String province, String city);
 
+//    List<HotelResponse> findByOrderByDiscountPriceDesc();
+//    List<HotelResponse> findByOrderByDiscountPriceAsc();
+//    List<HotelResponse> findByOrderByRatingScoreDesc();
+//    List<HotelResponse> findByOrderByRatingScoreAsc();
 
 }

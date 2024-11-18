@@ -2,15 +2,11 @@ package com.hotelligence.hotelservice.service;
 
 import com.hotelligence.hotelservice.dto.HotelRequest;
 import com.hotelligence.hotelservice.dto.HotelResponse;
-import com.hotelligence.hotelservice.dto.RoomResponse;
 import com.hotelligence.hotelservice.model.Hotel;
-import com.hotelligence.hotelservice.model.Room;
 import com.hotelligence.hotelservice.repository.HotelRepository;
-import com.hotelligence.hotelservice.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Comparator;
 import java.util.List;
@@ -22,8 +18,6 @@ import java.util.stream.Collectors;
 public class HotelService {
 
     private final HotelRepository hotelRepository;
-    private final RoomRepository roomRepository;
-    private final WebClient.Builder webClient;
 
     public void createHotel(HotelRequest hotelRequest) {
         Hotel hotel = new Hotel();
@@ -41,14 +35,12 @@ public class HotelService {
 
     public List<HotelResponse> getAllHotels() {
         List<Hotel> hotels = hotelRepository.findAll();
-
         return hotels.stream().map(this::mapToHotelResponse).toList();
     }
 
     public HotelResponse getHotelById(String hotelId) {
-        Hotel hotel = hotelRepository.findById(hotelId).
-                orElseThrow(() -> new IllegalArgumentException("Hotel with id " + hotelId + " does not exist"));
-
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new IllegalArgumentException("Hotel with id " + hotelId + " does not exist"));
         return mapToHotelResponse(hotel);
     }
 
@@ -62,23 +54,64 @@ public class HotelService {
                 .images(hotel.getImages())
                 .city(hotel.getCity())
                 .province(hotel.getProvince())
-//                .ratingScore(hotel.getRatingScore())
-//                .ratingCategory(hotel.getRatingCategory())
-//                .numOfReviews(hotel.getNumOfReviews())
-//                .originPrice(hotel.getOriginPrice())
-//                .discount(hotel.getDiscount())
-//                .discountPrice(hotel.getDiscountPrice())
-//                .taxPercentage(hotel.getTaxPercentage())
-//                .taxPrice(hotel.getTaxPrice())
-//                .extraFee(hotel.getExtraFee())
-//                .totalPrice(hotel.getTotalPrice())
+                .ratingScore(hotel.getRatingScore())
+                .ratingCategory(hotel.getRatingCategory())
+                .numOfReviews(hotel.getNumOfReviews())
+                .originPrice(hotel.getOriginPrice())
+                .discount(hotel.getDiscount())
+                .discountPrice(hotel.getDiscountPrice())
+                .taxPercentage(hotel.getTaxPercentage())
+                .taxPrice(hotel.getTaxPrice())
+                .extraFee(hotel.getExtraFee())
+                .totalPrice(hotel.getTotalPrice())
                 .build();
     }
 
+    public List<HotelResponse> search(String query, String sortBy, String sortOrder, Integer minPrice, Integer maxPrice, Integer minRatingScore, List<Integer> stars) {
+        List<HotelResponse> searchResults = hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
 
-    public List<HotelResponse> search(String query) {
-        return hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
+        // Apply filters
+        if (minPrice != null) {
+            searchResults = searchResults.stream()
+                    .filter(hotel -> hotel.getDiscountPrice() >= minPrice)
+                    .collect(Collectors.toList());
+        }
+        if (maxPrice != null) {
+            searchResults = searchResults.stream()
+                    .filter(hotel -> hotel.getDiscountPrice() <= maxPrice)
+                    .collect(Collectors.toList());
+        }
+        if (minRatingScore != null) {
+            searchResults = searchResults.stream()
+                    .filter(hotel -> hotel.getRatingScore() >= minRatingScore)
+                    .collect(Collectors.toList());
+        }
+        if (stars != null && !stars.isEmpty()) {
+            searchResults = searchResults.stream()
+                    .filter(hotel -> stars.contains(hotel.getStar()))
+                    .collect(Collectors.toList());
+        }
+
+        // Apply sorting
+        if (sortBy != null && sortOrder != null) {
+            Comparator<HotelResponse> comparator;
+            switch (sortBy) {
+                case "discountPrice":
+                    comparator = Comparator.comparing(HotelResponse::getDiscountPrice);
+                    break;
+                case "ratingScore":
+                    comparator = Comparator.comparing(HotelResponse::getRatingScore);
+                    break;
+                // Add more cases for other sort criteria
+                default:
+                    throw new IllegalArgumentException("Invalid sort criteria: " + sortBy);
+            }
+            if ("desc".equalsIgnoreCase(sortOrder)) {
+                comparator = comparator.reversed();
+            }
+            searchResults.sort(comparator);
+        }
+
+        return searchResults;
     }
-
-
 }
