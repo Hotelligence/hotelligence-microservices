@@ -20,7 +20,7 @@ public class ReviewResponse {
     private Integer servicePoint;
     private Integer staffPoint;
     private Integer facilityPoint;
-    private Integer ecoPoint;
+    private Integer ecofriendlyPoint;
     private Double overallPoint;
     private String pointCategory;
     private String comment;
