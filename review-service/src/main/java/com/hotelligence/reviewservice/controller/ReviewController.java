@@ -28,9 +28,30 @@ public class ReviewController {
         return reviewService.getAllReviews();
     }
 
+    @GetMapping(path = "/getReviewsByHotelId/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ReviewResponse> getReviewsByHotelId(@PathVariable("hotelId") String hotelId){
+        return reviewService.getReviewsByHotelId(hotelId);
+    }
+
     @GetMapping(path = "/getReviewsByRoomId/{roomId}")
     @ResponseStatus(HttpStatus.OK)
     public List<ReviewResponse> getReviewsByRoomId(@PathVariable("roomId") String roomId){
         return reviewService.getReviewsByRoomId(roomId);
     }
+
+    @GetMapping(path = "/getReviewCountByHotelId/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Integer getReviewCountByHotelId(@PathVariable("hotelId") String hotelId){
+        return reviewService.getReviewCountByHotelId(hotelId);
+    }
+
+    @GetMapping(path = "/getReviewAveragePointsByHotelId/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ReviewResponse getReviewAveragePointsByHotelId(@PathVariable("hotelId") String hotelId){
+        return reviewService.getReviewAveragePointsByHotelId(hotelId);
+    }
+
 }
+
+

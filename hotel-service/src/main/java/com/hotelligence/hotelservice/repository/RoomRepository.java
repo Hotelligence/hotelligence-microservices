@@ -16,4 +16,6 @@ public interface RoomRepository extends MongoRepository<Room, String> {
     List<RoomResponse> findByAvailableDatesBetween(LocalDateTime from, LocalDateTime to);
 
     List<Room> findByHotelId(String hotelId);
+
+    Room findFirstByOrderByDiscountPriceAsc(String hotelId);
 }

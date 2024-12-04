@@ -16,7 +16,7 @@ public class HotelController {
 
     private final HotelService hotelService;
 
-    @PostMapping
+    @PostMapping(path = "/create")
     @ResponseStatus(HttpStatus.CREATED)
     public void createHotel(@RequestBody HotelRequest hotelRequest){
         hotelService.createHotel(hotelRequest);

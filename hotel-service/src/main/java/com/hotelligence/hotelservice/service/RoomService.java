@@ -9,6 +9,7 @@ import com.hotelligence.hotelservice.model.Room;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
+    private final WebClient webClient;
 
     public void createRoom(String hotelId, RoomRequest roomRequest) {
         Room room = Room.builder()
@@ -99,4 +101,9 @@ public class RoomService {
 
         return mapToRoomResponse(room);
     }
+
+    public RoomResponse getRoomWithTheLowestDiscountPrice(String hotelId) {
+        return mapToRoomResponse(roomRepository.findFirstByOrderByDiscountPriceAsc(hotelId));
+    }
+
 }

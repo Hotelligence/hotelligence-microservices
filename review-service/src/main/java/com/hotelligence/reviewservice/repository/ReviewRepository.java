@@ -8,5 +8,9 @@ import java.util.List;
 
 @Repository
 public interface ReviewRepository extends MongoRepository<Review, String>{
+    List<Review> findByHotelId(String hotelId);
     List<Review> findByRoomId(String roomId);
+
+    Integer countByHotelId(String hotelId);
+
 }

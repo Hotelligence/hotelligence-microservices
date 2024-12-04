@@ -18,19 +18,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
 
     public void writeReview(String roomId, ReviewRequest reviewRequest) {
-//        Review review = new Review();
-//        review.setRoomId(roomId);
-//        review.setUserId(reviewRequest.getUserId());
-//        review.setUserName(reviewRequest.getUserName());
-//        review.setCleanPoint(reviewRequest.getCleanPoint());
-//        review.setServicePoint(reviewRequest.getServicePoint());
-//        review.setStaffPoint(reviewRequest.getStaffPoint());
-//        review.setFacilityPoint(reviewRequest.getFacilityPoint());
-//        review.setEcoPoint(reviewRequest.getEcoPoint());
-//        review.setComment(reviewRequest.getComment());
-//        review.setReviewDate(reviewRequest.getReviewDate());
-
         Review review = Review.builder()
+                .hotelId(reviewRequest.getHotelId())
                 .roomId(roomId)
                 .userId(reviewRequest.getUserId())
                 .userName(reviewRequest.getUserName())
@@ -38,7 +27,7 @@ public class ReviewService {
                 .servicePoint(reviewRequest.getServicePoint())
                 .staffPoint(reviewRequest.getStaffPoint())
                 .facilityPoint(reviewRequest.getFacilityPoint())
-                .ecofriendlyPoint(reviewRequest.getEcofriendlyPoint())
+                .environmentPoint(reviewRequest.getEnvironmentPoint())
                 .comment(reviewRequest.getComment())
                 .reviewDate(reviewRequest.getReviewDate())
                 .build();
@@ -55,8 +44,11 @@ public class ReviewService {
     }
 
     private ReviewResponse mapToReviewResponse(Review review) {
+        double overallPoint = (review.getCleanPoint() + review.getServicePoint() + review.getStaffPoint() + review.getFacilityPoint() + review.getEnvironmentPoint()) / 5;
+
         return ReviewResponse.builder()
                 .id(review.getId())
+                .hotelId(review.getHotelId())
                 .roomId(review.getRoomId())
                 .userId(review.getUserId())
                 .userName(review.getUserName())
@@ -64,12 +56,20 @@ public class ReviewService {
                 .servicePoint(review.getServicePoint())
                 .staffPoint(review.getStaffPoint())
                 .facilityPoint(review.getFacilityPoint())
-                .ecofriendlyPoint(review.getEcofriendlyPoint())
-                .overallPoint(review.getOverallPoint())
+                .environmentPoint(review.getEnvironmentPoint())
+                .overallPoint(overallPoint)
                 .pointCategory(review.getPointCategory())
                 .comment(review.getComment())
                 .reviewDate(review.getReviewDate())
                 .build();
+    }
+
+
+
+    public List<ReviewResponse> getReviewsByHotelId(String hotelId) {
+        List<Review> reviews = reviewRepository.findByHotelId(hotelId);
+
+        return reviews.stream().map(this::mapToReviewResponse).toList();
     }
 
     public List<ReviewResponse> getReviewsByRoomId(String roomId) {
@@ -78,5 +78,44 @@ public class ReviewService {
         return reviews.stream().map(this::mapToReviewResponse).toList();
     }
 
+    public Integer getReviewCountByHotelId(String hotelId) {
+        return reviewRepository.countByHotelId(hotelId);
+    }
+
+    public ReviewResponse getReviewAveragePointsByHotelId(String hotelId) {
+        List<Review> reviews = reviewRepository.findByHotelId(hotelId);
+        double totalCleanPoint = 0;
+        double totalServicePoint = 0;
+        double totalStaffPoint = 0;
+        double totalFacilityPoint = 0;
+        double totalEnvironmentPoint = 0;
+        int count = reviews.size();
+
+        for (Review review : reviews) {
+            if (review.getCleanPoint() != null) totalCleanPoint += review.getCleanPoint();
+            if (review.getServicePoint() != null) totalServicePoint += review.getServicePoint();
+            if (review.getStaffPoint() != null) totalStaffPoint += review.getStaffPoint();
+            if (review.getFacilityPoint() != null) totalFacilityPoint += review.getFacilityPoint();
+            if (review.getEnvironmentPoint() != null) totalEnvironmentPoint += review.getEnvironmentPoint();
+        }
+
+        double averageCleanPoint = totalCleanPoint / count;
+        double averageServicePoint = totalServicePoint / count;
+        double averageStaffPoint = totalStaffPoint / count;
+        double averageFacilityPoint = totalFacilityPoint / count;
+        double averageEnvironmentPoint = totalEnvironmentPoint / count;
+
+        double averageOverallPoint = (averageCleanPoint + averageServicePoint + averageStaffPoint + averageFacilityPoint + averageEnvironmentPoint) / 5;
+
+        return ReviewResponse.builder()
+                .hotelId(hotelId)
+                .cleanPoint(averageCleanPoint)
+                .servicePoint(averageServicePoint)
+                .staffPoint(averageStaffPoint)
+                .facilityPoint(averageFacilityPoint)
+                .environmentPoint(averageEnvironmentPoint)
+                .overallPoint(averageOverallPoint)
+                .build();
+    }
 
 }

@@ -2,11 +2,16 @@ package com.hotelligence.hotelservice.service;
 
 import com.hotelligence.hotelservice.dto.HotelRequest;
 import com.hotelligence.hotelservice.dto.HotelResponse;
+import com.hotelligence.hotelservice.dto.RoomResponse;
 import com.hotelligence.hotelservice.model.Hotel;
+import com.hotelligence.hotelservice.model.Room;
 import com.hotelligence.hotelservice.repository.HotelRepository;
+import com.hotelligence.hotelservice.repository.RoomRepository;
+import com.hotelligence.hotelservice.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +23,7 @@ import java.util.stream.Collectors;
 public class HotelService {
 
     private final HotelRepository hotelRepository;
+    private final WebClient webClient;
 
     public void createHotel(HotelRequest hotelRequest) {
         Hotel hotel = new Hotel();
@@ -45,25 +51,43 @@ public class HotelService {
     }
 
     private HotelResponse mapToHotelResponse(Hotel hotel) {
+        RoomResponse lowestRoom = webClient.get()
+                .uri("http://localhost:8080/api/rooms/getRoomWithTheLowestDiscountPrice/" + hotel.getId())
+                .retrieve()
+                .bodyToMono(RoomResponse.class)
+                .block();
+
+        assert lowestRoom != null;
+
         return HotelResponse.builder()
                 .id(hotel.getId())
+                .createdBy(hotel.getCreatedBy())
                 .hotelName(hotel.getHotelName())
+                .country(hotel.getCountry())
+                .province(hotel.getProvince())
+                .city(hotel.getCity())
+                .district(hotel.getDistrict())
                 .address(hotel.getAddress())
+                .postalCode(hotel.getPostalCode())
+                .businessType(hotel.getBusinessType())
+                .phoneNumber(hotel.getPhoneNumber())
+                .emailAddress(hotel.getEmailAddress())
                 .star(hotel.getStar())
                 .description(hotel.getDescription())
                 .images(hotel.getImages())
-                .city(hotel.getCity())
-                .province(hotel.getProvince())
-                .ratingScore(hotel.getRatingScore())
-                .ratingCategory(hotel.getRatingCategory())
-                .numOfReviews(hotel.getNumOfReviews())
-                .originPrice(hotel.getOriginPrice())
-                .discount(hotel.getDiscount())
-                .discountPrice(hotel.getDiscountPrice())
-                .taxPercentage(hotel.getTaxPercentage())
-                .taxPrice(hotel.getTaxPrice())
-                .extraFee(hotel.getExtraFee())
-                .totalPrice(hotel.getTotalPrice())
+                .roomLowestDiscount(lowestRoom.getDiscount())
+                .roomLowestOriginPrice(lowestRoom.getOriginPrice())
+                .roomLowestTaxPercentage(lowestRoom.getTaxPercentage())
+                .roomLowestTax(lowestRoom.getTax())
+                .roomLowestDiscountPrice(lowestRoom.getDiscountPrice())
+                .roomLowestTotalPrice(lowestRoom.getTotalPrice())
+                .reviewCount(getReviewCountByHotelId(hotel.getId()))
+                .reviewAverageCleanPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageCleanPoint())
+                .reviewAverageServicePoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageServicePoint())
+                .reviewAverageStaffPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageStaffPoint())
+                .reviewAverageFacilityPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageFacilityPoint())
+                .reviewAverageEcofriendlyPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageEcofriendlyPoint())
+                .reviewAverageOverallPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageOverallPoint())
                 .build();
     }
 
@@ -73,17 +97,17 @@ public class HotelService {
         // Apply filters
         if (minPrice != null) {
             searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getDiscountPrice() >= minPrice)
+                    .filter(hotel -> hotel.getRoomLowestDiscountPrice() >= minPrice)
                     .collect(Collectors.toList());
         }
         if (maxPrice != null) {
             searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getDiscountPrice() <= maxPrice)
+                    .filter(hotel -> hotel.getRoomLowestDiscountPrice() <= maxPrice)
                     .collect(Collectors.toList());
         }
         if (minRatingScore != null) {
             searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getRatingScore() >= minRatingScore)
+                    .filter(hotel -> hotel.getReviewAverageOverallPoint() >= minRatingScore)
                     .collect(Collectors.toList());
         }
         if (stars != null && !stars.isEmpty()) {
@@ -97,10 +121,10 @@ public class HotelService {
             Comparator<HotelResponse> comparator;
             switch (sortBy) {
                 case "discountPrice":
-                    comparator = Comparator.comparing(HotelResponse::getDiscountPrice);
+                    comparator = Comparator.comparing(HotelResponse::getRoomLowestDiscountPrice);
                     break;
                 case "ratingScore":
-                    comparator = Comparator.comparing(HotelResponse::getRatingScore);
+                    comparator = Comparator.comparing(HotelResponse::getReviewAverageOverallPoint);
                     break;
                 // Add more cases for other sort criteria
                 default:
@@ -113,5 +137,21 @@ public class HotelService {
         }
 
         return searchResults;
+    }
+
+    public Integer getReviewCountByHotelId(String hotelId) {
+        return webClient.get()
+                .uri("http://localhost:8080/api/reviews/getReviewCountByHotelId/" + hotelId)
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .block();
+    }
+
+    public HotelResponse getReviewAveragePointsByHotelId(String hotelId) {
+        return webClient.get()
+                .uri("http://localhost:8080/api/reviews/getReviewAveragePointsByHotelId/" + hotelId)
+                .retrieve()
+                .bodyToMono(HotelResponse.class)
+                .block();
     }
 }

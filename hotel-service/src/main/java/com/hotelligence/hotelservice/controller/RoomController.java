@@ -46,4 +46,11 @@ public class RoomController {
     public RoomResponse getRoomById(@PathVariable("id") String roomId){
         return roomService.getRoomById(roomId);
     }
+
+    @GetMapping(path = "/getRoomWithLowestDiscountPrice/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public RoomResponse getRoomWithTheLowestDiscountPrice(@PathVariable("hotelId") String hotelId){
+        return roomService.getRoomWithTheLowestDiscountPrice(hotelId);
+    }
+
 }

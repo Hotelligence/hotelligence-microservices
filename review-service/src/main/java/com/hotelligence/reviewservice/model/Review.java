@@ -14,14 +14,15 @@ import java.time.LocalDateTime;
 public class Review {
     @Id
     private String id;
+    private String hotelId;
     private String roomId;
     private String userId;
     private String userName;
-    private Integer cleanPoint;
-    private Integer servicePoint;
-    private Integer staffPoint;
-    private Integer facilityPoint;
-    private Integer ecofriendlyPoint;
+    private Double cleanPoint;
+    private Double servicePoint;
+    private Double staffPoint;
+    private Double facilityPoint;
+    private Double environmentPoint;
     private Double overallPoint;
     private String pointCategory;
     private String comment;
