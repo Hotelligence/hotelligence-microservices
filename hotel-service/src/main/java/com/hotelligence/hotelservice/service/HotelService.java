@@ -11,6 +11,7 @@ import com.hotelligence.hotelservice.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Comparator;
@@ -26,14 +27,23 @@ public class HotelService {
     private final WebClient webClient;
 
     public void createHotel(HotelRequest hotelRequest) {
-        Hotel hotel = new Hotel();
-        hotel.setHotelName(hotelRequest.getHotelName());
-        hotel.setAddress(hotelRequest.getAddress());
-        hotel.setStar(hotelRequest.getStar());
-        hotel.setDescription(hotelRequest.getDescription());
-        hotel.setImages(hotelRequest.getImages());
-        hotel.setCity(hotelRequest.getCity());
-        hotel.setProvince(hotelRequest.getProvince());
+        Hotel hotel = Hotel.builder()
+                    .createdBy(hotelRequest.getCreatedBy())
+                    .hotelName(hotelRequest.getHotelName())
+                    .country(hotelRequest.getCountry())
+                    .province(hotelRequest.getProvince())
+                    .city(hotelRequest.getCity())
+                    .district(hotelRequest.getDistrict())
+                    .address(hotelRequest.getAddress())
+                    .postalCode(hotelRequest.getPostalCode())
+                    .businessType(hotelRequest.getBusinessType())
+                    .phoneNumber(hotelRequest.getPhoneNumber())
+                    .emailAddress(hotelRequest.getEmailAddress())
+                    .star(hotelRequest.getStar())
+                    .description(hotelRequest.getDescription())
+                    .images(hotelRequest.getImages())
+                    .build();
+
 
         hotelRepository.save(hotel);
         log.info("Hotel {} is saved", hotel.getId());
@@ -52,9 +62,15 @@ public class HotelService {
 
     private HotelResponse mapToHotelResponse(Hotel hotel) {
         RoomResponse lowestRoom = webClient.get()
-                .uri("http://localhost:8080/api/rooms/getRoomWithTheLowestDiscountPrice/" + hotel.getId())
+                .uri("http://localhost:8080/api/rooms/getRoomWithLowestDiscountPrice/" + hotel.getId())
                 .retrieve()
                 .bodyToMono(RoomResponse.class)
+                .block();
+
+        int roomCount = webClient.get()
+                .uri("http://localhost:8080/api/rooms/getRoomCountByHotelId/" + hotel.getId())
+                .retrieve()
+                .bodyToMono(Integer.class)
                 .block();
 
         assert lowestRoom != null;
@@ -75,6 +91,11 @@ public class HotelService {
                 .star(hotel.getStar())
                 .description(hotel.getDescription())
                 .images(hotel.getImages())
+                .optionalFees(hotel.getOptionalFees())
+                .amenities(hotel.getAmenities())
+                .policies(hotel.getPolicies())
+                .otherNames(hotel.getOtherNames())
+                .roomCount(roomCount)
                 .roomLowestDiscount(lowestRoom.getDiscount())
                 .roomLowestOriginPrice(lowestRoom.getOriginPrice())
                 .roomLowestTaxPercentage(lowestRoom.getTaxPercentage())
@@ -154,4 +175,39 @@ public class HotelService {
                 .bodyToMono(HotelResponse.class)
                 .block();
     }
+
+    @Transactional
+    public HotelResponse updateHotel(String hotelId, HotelRequest hotelRequest) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new IllegalArgumentException("Hotel with id " + hotelId + " does not exist"));
+
+        hotel.setHotelName(hotelRequest.getHotelName());
+        hotel.setCountry(hotelRequest.getCountry());
+        hotel.setProvince(hotelRequest.getProvince());
+        hotel.setCity(hotelRequest.getCity());
+        hotel.setDistrict(hotelRequest.getDistrict());
+        hotel.setAddress(hotelRequest.getAddress());
+        hotel.setPostalCode(hotelRequest.getPostalCode());
+        hotel.setBusinessType(hotelRequest.getBusinessType());
+        hotel.setPhoneNumber(hotelRequest.getPhoneNumber());
+        hotel.setEmailAddress(hotelRequest.getEmailAddress());
+        hotel.setStar(hotelRequest.getStar());
+        hotel.setDescription(hotelRequest.getDescription());
+        hotel.setImages(hotelRequest.getImages());
+        hotel.setOptionalFees(hotelRequest.getOptionalFees());
+        hotel.setAmenities(hotelRequest.getAmenities());
+        hotel.setPolicies(hotelRequest.getPolicies());
+        hotel.setOtherNames(hotelRequest.getOtherNames());
+
+        hotelRepository.save(hotel);
+        log.info("Hotel {} is updated", hotel.getId());
+
+        return mapToHotelResponse(hotel);
+    }
+
+    public List<HotelResponse> getHotelsByUserId(String userId) {
+        List<Hotel> hotels = hotelRepository.findByCreatedBy(userId);
+        return hotels.stream().map(this::mapToHotelResponse).toList();
+    }
+
 }

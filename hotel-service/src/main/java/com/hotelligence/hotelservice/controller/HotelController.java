@@ -45,4 +45,16 @@ public class HotelController {
                                       @RequestParam(required = false) List<Integer> stars) {
         return hotelService.search(query, sortBy, sortOrder, minPrice, maxPrice, minRatingScore, stars);
     }
+
+    @PatchMapping(path = "/updateHotel/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public HotelResponse updateHotel(@PathVariable("id") String hotelId, @RequestBody HotelRequest hotelRequest){
+        return hotelService.updateHotel(hotelId, hotelRequest);
+    }
+
+    @GetMapping(path = "/getHotelsByUserId/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<HotelResponse> getHotelsByUserId(@PathVariable("userId") String userId){
+        return hotelService.getHotelsByUserId(userId);
+    }
 }

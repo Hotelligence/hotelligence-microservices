@@ -18,4 +18,6 @@ public interface RoomRepository extends MongoRepository<Room, String> {
     List<Room> findByHotelId(String hotelId);
 
     Room findFirstByOrderByDiscountPriceAsc(String hotelId);
+
+    Integer countByHotelId(String hotelId);
 }

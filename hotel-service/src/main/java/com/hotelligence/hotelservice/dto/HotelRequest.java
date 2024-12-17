@@ -23,8 +23,12 @@ public class HotelRequest {
     private String businessType;
     private String phoneNumber;
     private String emailAddress;
-
     private Integer star;
     private String description;
     private List<String> images;
+
+    private String optionalFees;
+    private String amenities;
+    private String policies;
+    private String otherNames;
 }

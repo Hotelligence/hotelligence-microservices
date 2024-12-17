@@ -30,7 +30,13 @@ public class Hotel {
     private String description;
     private List<String> images;
 
+    private String optionalFees;
+    private String amenities;
+    private String policies;
+    private String otherNames;
+
     //get from Room
+    private Integer roomCount;
     private Double roomLowestDiscount;
     private Integer roomLowestOriginPrice;
     private Double roomLowestTaxPercentage;

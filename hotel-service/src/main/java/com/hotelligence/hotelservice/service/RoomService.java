@@ -21,7 +21,6 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
-    private final WebClient webClient;
 
     public void createRoom(String hotelId, RoomRequest roomRequest) {
         Room room = Room.builder()
@@ -86,6 +85,10 @@ public class RoomService {
 //    public List<RoomResponse> searchAvailableRooms(LocalDateTime from, LocalDateTime to) {
 //        return roomRepository.findByAvailableDatesBetween(from, to);
 //    }
+
+    public Integer getRoomCountByHotelId(String hotelId) {
+        return roomRepository.countByHotelId(hotelId);
+    }
 
     public List<RoomResponse> getRoomsInHotel(String hotelId) {
         Hotel hotel = hotelRepository.findById(hotelId)
