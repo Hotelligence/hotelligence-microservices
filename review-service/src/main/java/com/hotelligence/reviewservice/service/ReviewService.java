@@ -64,8 +64,6 @@ public class ReviewService {
                 .build();
     }
 
-
-
     public List<ReviewResponse> getReviewsByHotelId(String hotelId) {
         List<Review> reviews = reviewRepository.findByHotelId(hotelId);
 
