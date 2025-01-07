@@ -45,6 +45,12 @@ public class ReviewService {
 
     private ReviewResponse mapToReviewResponse(Review review) {
         double overallPoint = (review.getCleanPoint() + review.getServicePoint() + review.getStaffPoint() + review.getFacilityPoint() + review.getEnvironmentPoint()) / 5;
+        String pointCategory = overallPoint > 9.75 ? "Trên cả tuyệt vời!" :
+                                overallPoint > 9 ? "Tuyệt vời" :
+                                overallPoint > 8 ? "Rất tốt" :
+                                overallPoint > 7 ? "Tốt" :
+                                overallPoint > 6 ? "Khá tốt" :
+                                overallPoint >= 0 ? "Trung bình" : "Chưa có đánh giá";
 
         return ReviewResponse.builder()
                 .id(review.getId())
@@ -58,7 +64,7 @@ public class ReviewService {
                 .facilityPoint(review.getFacilityPoint())
                 .environmentPoint(review.getEnvironmentPoint())
                 .overallPoint(overallPoint)
-                .pointCategory(review.getPointCategory())
+                .pointCategory(pointCategory)
                 .comment(review.getComment())
                 .reviewDate(review.getReviewDate())
                 .build();
@@ -105,6 +111,12 @@ public class ReviewService {
 
         double averageOverallPoint = (averageCleanPoint + averageServicePoint + averageStaffPoint + averageFacilityPoint + averageEnvironmentPoint) / 5;
 
+        String averagePointCategory = averageOverallPoint > 9.75 ? "Trên cả tuyệt vời!" :
+                                        averageOverallPoint > 9 ? "Tuyệt vời" :
+                                        averageOverallPoint > 8 ? "Rất tốt" :
+                                        averageOverallPoint > 7 ? "Tốt" :
+                                        averageOverallPoint >= 0 ? "Trung bình" : "Chưa có đánh giá";
+
         return ReviewResponse.builder()
                 .hotelId(hotelId)
                 .cleanPoint(averageCleanPoint)
@@ -113,6 +125,7 @@ public class ReviewService {
                 .facilityPoint(averageFacilityPoint)
                 .environmentPoint(averageEnvironmentPoint)
                 .overallPoint(averageOverallPoint)
+                .pointCategory(averagePointCategory)
                 .build();
     }
 
