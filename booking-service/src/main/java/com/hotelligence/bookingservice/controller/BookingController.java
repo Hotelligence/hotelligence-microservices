@@ -59,4 +59,9 @@ public class BookingController {
         return bookingService.cancelBooking(bookingId);
     }
 
+    @GetMapping(path = "/getActiveBookingByRoomId/{roomId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BookingResponse getActiveBookingByRoomId(@PathVariable("roomId") String roomId){
+        return bookingService.getActiveBookingByRoomId(roomId);
+    }
 }

@@ -14,15 +14,21 @@ import java.time.LocalDateTime;
 public class BookingResponse {
     private String id;
     private String userId;
+    private String hotelId;
     private String roomId;
+
     private String fullName;
     private String email;
     private String phoneNumber;
     private String paymentMethod;
+
     private LocalDateTime bookingDate;
     private LocalDateTime checkinDate;
     private LocalDateTime checkoutDate;
+    private Integer numOfNights;
+
     private String bookingStatus;
+    private boolean isCheckedOut;
     private LocalDateTime cancelDue;
     private LocalDateTime unCancelDue;
 }

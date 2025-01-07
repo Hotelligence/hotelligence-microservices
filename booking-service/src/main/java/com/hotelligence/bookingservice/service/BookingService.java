@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,19 +23,19 @@ public class BookingService {
 
 
     public void placeBooking(String roomId, BookingRequest bookingRequest) {
-        Booking booking = new Booking();
-        booking.setUserId(bookingRequest.getUserId());
-        booking.setRoomId(roomId);
-        booking.setFullName(bookingRequest.getFullName());
-        booking.setEmail(bookingRequest.getEmail());
-        booking.setPhoneNumber(bookingRequest.getPhoneNumber());
-        booking.setPaymentMethod(bookingRequest.getPaymentMethod());
-        booking.setBookingDate(bookingRequest.getBookingDate());
-        booking.setCheckinDate(bookingRequest.getCheckinDate());
-        booking.setCheckoutDate(bookingRequest.getCheckoutDate());
-        booking.setBookingStatus(bookingRequest.getBookingStatus());
-        booking.setCancelDue(bookingRequest.getCancelDue());
-        booking.setUnCancelDue(bookingRequest.getUnCancelDue());
+        Booking booking = Booking.builder()
+                .roomId(roomId)
+                .userId(bookingRequest.getUserId())
+                .fullName(bookingRequest.getFullName())
+                .email(bookingRequest.getEmail())
+                .phoneNumber(bookingRequest.getPhoneNumber())
+                .paymentMethod(bookingRequest.getPaymentMethod())
+                .bookingDate(LocalDateTime.now())
+                .checkinDate(bookingRequest.getCheckinDate())
+                .checkoutDate(bookingRequest.getCheckoutDate())
+                .bookingStatus("Đặt phòng thành công")
+                .isCheckedOut(false)
+                .build();
 
         bookingRepository.save(booking);
 
@@ -61,6 +62,9 @@ public class BookingService {
     }
 
     private BookingResponse mapToBookingResponse(Booking booking) {
+        LocalDateTime cancelDue = booking.getBookingDate().plusDays(3);
+        LocalDateTime unCancelDue = booking.getBookingDate().plusDays(7);
+
         return BookingResponse.builder()
                 .id(booking.getId())
                 .userId(booking.getUserId())
@@ -73,8 +77,9 @@ public class BookingService {
                 .checkinDate(booking.getCheckinDate())
                 .checkoutDate(booking.getCheckoutDate())
                 .bookingStatus(booking.getBookingStatus())
-                .cancelDue(booking.getCancelDue())
-                .unCancelDue(booking.getUnCancelDue())
+                .isCheckedOut(booking.isCheckedOut())
+                .cancelDue(cancelDue)
+                .unCancelDue(unCancelDue)
                 .build();
     }
 
@@ -104,4 +109,14 @@ public class BookingService {
         bookingRepository.save(booking);
         return mapToBookingResponse(booking);
     }
+
+    public BookingResponse getActiveBookingByRoomId(String roomId) {
+        List<BookingResponse> bookings = getBookingsByRoomId(roomId);
+
+        return bookings.stream()
+                .filter(booking -> !booking.isCheckedOut())
+                .findFirst()
+                .orElse(null);
+    }
+
 }
