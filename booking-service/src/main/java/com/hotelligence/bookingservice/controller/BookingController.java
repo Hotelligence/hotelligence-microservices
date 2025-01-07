@@ -64,4 +64,16 @@ public class BookingController {
     public BookingResponse getActiveBookingByRoomId(@PathVariable("roomId") String roomId){
         return bookingService.getActiveBookingByRoomId(roomId);
     }
+
+    @GetMapping(path = "/getBookingsByHotelId/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<BookingResponse> getBookingsByHotelId(@PathVariable("hotelId") String hotelId){
+        return bookingService.getBookingsByHotelId(hotelId);
+    }
+
+    @PatchMapping(path = "/updateCheckoutStatus/{bookingId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BookingResponse updateCheckoutStatus(@PathVariable("bookingId") String bookingId){
+        return bookingService.updateCheckoutStatus(bookingId);
+    }
 }

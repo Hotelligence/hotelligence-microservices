@@ -16,6 +16,7 @@ public class BookingRequest {
     private String userId;
     private String hotelId;
     private String roomId;
+    private String roomName;
 
     private String fullName;
     private String email;
@@ -25,7 +26,7 @@ public class BookingRequest {
     private LocalDateTime bookingDate;
     private LocalDateTime checkinDate;
     private LocalDateTime checkoutDate;
-    private Integer numOfNights;
+//    private Integer numOfNights;
 
     private String bookingStatus;
     private boolean isCheckedOut;

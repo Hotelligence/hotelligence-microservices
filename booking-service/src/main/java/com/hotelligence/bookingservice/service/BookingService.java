@@ -24,8 +24,10 @@ public class BookingService {
 
     public void placeBooking(String roomId, BookingRequest bookingRequest) {
         Booking booking = Booking.builder()
-                .roomId(roomId)
                 .userId(bookingRequest.getUserId())
+                .hotelId(bookingRequest.getHotelId())
+                .roomId(roomId)
+                .roomName(bookingRequest.getRoomName())
                 .fullName(bookingRequest.getFullName())
                 .email(bookingRequest.getEmail())
                 .phoneNumber(bookingRequest.getPhoneNumber())
@@ -33,7 +35,7 @@ public class BookingService {
                 .bookingDate(LocalDateTime.now())
                 .checkinDate(bookingRequest.getCheckinDate())
                 .checkoutDate(bookingRequest.getCheckoutDate())
-                .bookingStatus("Đặt phòng thành công")
+                .bookingStatus("Đang chờ thanh toán")
                 .isCheckedOut(false)
                 .build();
 
@@ -64,11 +66,14 @@ public class BookingService {
     private BookingResponse mapToBookingResponse(Booking booking) {
         LocalDateTime cancelDue = booking.getBookingDate().plusDays(3);
         LocalDateTime unCancelDue = booking.getBookingDate().plusDays(7);
+        Integer numOfNights = booking.getCheckoutDate().getDayOfYear() - booking.getCheckinDate().getDayOfYear();
 
         return BookingResponse.builder()
                 .id(booking.getId())
                 .userId(booking.getUserId())
+                .hotelId(booking.getHotelId())
                 .roomId(booking.getRoomId())
+                .roomName(booking.getRoomName())
                 .fullName(booking.getFullName())
                 .email(booking.getEmail())
                 .phoneNumber(booking.getPhoneNumber())
@@ -76,6 +81,7 @@ public class BookingService {
                 .bookingDate(booking.getBookingDate())
                 .checkinDate(booking.getCheckinDate())
                 .checkoutDate(booking.getCheckoutDate())
+                .numOfNights(numOfNights)
                 .bookingStatus(booking.getBookingStatus())
                 .isCheckedOut(booking.isCheckedOut())
                 .cancelDue(cancelDue)
@@ -119,4 +125,19 @@ public class BookingService {
                 .orElse(null);
     }
 
+    public List<BookingResponse> getBookingsByHotelId(String hotelId) {
+        List<Booking> bookings = bookingRepository.findByHotelId(hotelId);
+
+        return bookings.stream().map(this::mapToBookingResponse).toList();
+    }
+
+    public BookingResponse updateCheckoutStatus(String bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking with id " + bookingId + " does not exist"));
+
+        booking.setCheckedOut(true);
+        booking.setBookingStatus("Hoàn tất");
+        bookingRepository.save(booking);
+        return mapToBookingResponse(booking);
+    }
 }
