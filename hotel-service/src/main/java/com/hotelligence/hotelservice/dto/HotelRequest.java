@@ -1,5 +1,6 @@
 package com.hotelligence.hotelservice.dto;
 
+import com.hotelligence.hotelservice.model.Hotel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,4 +32,7 @@ public class HotelRequest {
     private String amenities;
     private String policies;
     private String otherNames;
+
+    private List<Hotel.RoomAmenities> roomAmenities;
+    private List<Hotel.ExtraOptions> extraOptions;
 }

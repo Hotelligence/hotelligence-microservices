@@ -2,6 +2,7 @@ package com.hotelligence.hotelservice.controller;
 
 import com.hotelligence.hotelservice.dto.HotelRequest;
 import com.hotelligence.hotelservice.dto.HotelResponse;
+import com.hotelligence.hotelservice.model.Hotel;
 import com.hotelligence.hotelservice.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,5 +57,17 @@ public class HotelController {
     @ResponseStatus(HttpStatus.OK)
     public List<HotelResponse> getHotelsByUserId(@PathVariable("userId") String userId){
         return hotelService.getHotelsByUserId(userId);
+    }
+
+    @GetMapping(path = "/getCountByUserId/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Integer getCountByCreatedBy(@PathVariable("userId") String userId){
+        return hotelService.getCountByCreatedBy(userId);
+    }
+
+    @GetMapping(path = "/getAllRoomAmenitiesByHotelId/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Hotel.RoomAmenities> getAllRoomAmenitiesByHotelId(@PathVariable("hotelId") String hotelId){
+        return hotelService.getAllRoomAmenitiesByHotelId(hotelId);
     }
 }

@@ -1,5 +1,6 @@
 package com.hotelligence.hotelservice.dto;
 
+import com.hotelligence.hotelservice.model.Hotel;
 import com.hotelligence.hotelservice.model.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,21 +36,24 @@ public class HotelResponse {
     private String policies;
     private String otherNames;
 
+    private List<Hotel.RoomAmenities> roomAmenities;
+    private List<Hotel.ExtraOptions> extraOptions;
+
     //get from Room
     private Integer roomCount;
-    private Double roomLowestDiscount;
     private Integer roomLowestOriginPrice;
+    private Double roomLowestDiscountPercentage;
+    private Integer roomLowestDiscountedPrice;
     private Double roomLowestTaxPercentage;
-    private Integer roomLowestTax;
-    private Integer roomLowestDiscountPrice;
     private Integer roomLowestTotalPrice;
 
     //get from Review
     private Integer reviewCount;
-    private Integer reviewAverageCleanPoint;
-    private Integer reviewAverageServicePoint;
-    private Integer reviewAverageStaffPoint;
-    private Integer reviewAverageFacilityPoint;
-    private Integer reviewAverageEcofriendlyPoint;
+    private Double reviewAverageCleanPoint;
+    private Double reviewAverageServicePoint;
+    private Double reviewAverageStaffPoint;
+    private Double reviewAverageFacilityPoint;
+    private Double reviewAverageEnvironmentPoint;
     private Double reviewAverageOverallPoint;
+    private String reviewAveragePointCategory;
 }

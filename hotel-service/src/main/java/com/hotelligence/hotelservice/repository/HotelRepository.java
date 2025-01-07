@@ -9,13 +9,10 @@ import java.util.List;
 
 @Repository
 public interface HotelRepository extends MongoRepository<Hotel, String> {
-    List<HotelResponse> findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(String hotelName, String province, String city);
+    List<Hotel> findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(String hotelName, String province, String city);
 
     List<Hotel> findByCreatedBy(String createdBy);
 
-//    List<HotelResponse> findByOrderByDiscountPriceDesc();
-//    List<HotelResponse> findByOrderByDiscountPriceAsc();
-//    List<HotelResponse> findByOrderByRatingScoreDesc();
-//    List<HotelResponse> findByOrderByRatingScoreAsc();
+    Integer countByCreatedBy(String createdBy);
 
 }

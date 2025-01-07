@@ -35,21 +35,42 @@ public class Hotel {
     private String policies;
     private String otherNames;
 
+    private List<RoomAmenities> roomAmenities;
+    private List<ExtraOptions> extraOptions;
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RoomAmenities {
+        private String amenityType;
+        private List<String> amenityName;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ExtraOptions {
+        private String optionName;
+        private Integer optionPrice;
+    }
+
     //get from Room
     private Integer roomCount;
-    private Double roomLowestDiscount;
     private Integer roomLowestOriginPrice;
+    private Double roomLowestDiscountPercentage;
+    private Integer roomLowestDiscountedPrice;
     private Double roomLowestTaxPercentage;
-    private Integer roomLowestTax;
-    private Integer roomLowestDiscountPrice;
     private Integer roomLowestTotalPrice;
 
     //get from Review
     private Integer reviewCount;
-    private Integer reviewAverageCleanPoint;
-    private Integer reviewAverageServicePoint;
-    private Integer reviewAverageStaffPoint;
-    private Integer reviewAverageFacilityPoint;
-    private Integer reviewAverageEcofriendlyPoint;
+    private Double reviewAverageCleanPoint;
+    private Double reviewAverageServicePoint;
+    private Double reviewAverageStaffPoint;
+    private Double reviewAverageFacilityPoint;
+    private Double reviewAverageEnvironmentPoint;
     private Double reviewAverageOverallPoint;
+    private String reviewAveragePointCategory;
 }

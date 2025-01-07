@@ -6,14 +6,14 @@ import com.hotelligence.hotelservice.dto.RoomResponse;
 import com.hotelligence.hotelservice.model.Hotel;
 import com.hotelligence.hotelservice.model.Room;
 import com.hotelligence.hotelservice.repository.HotelRepository;
-import com.hotelligence.hotelservice.repository.RoomRepository;
-import com.hotelligence.hotelservice.service.RoomService;
+import com.hotelligence.reviewservice.dto.ReviewResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +44,6 @@ public class HotelService {
                     .images(hotelRequest.getImages())
                     .build();
 
-
         hotelRepository.save(hotel);
         log.info("Hotel {} is saved", hotel.getId());
     }
@@ -67,13 +66,33 @@ public class HotelService {
                 .bodyToMono(RoomResponse.class)
                 .block();
 
+        if (lowestRoom == null) {
+            log.warn("No room data found for hotel id: {}", hotel.getId());
+            lowestRoom = new RoomResponse(); // or handle appropriately
+        }
+
         int roomCount = webClient.get()
                 .uri("http://localhost:8080/api/rooms/getRoomCountByHotelId/" + hotel.getId())
                 .retrieve()
                 .bodyToMono(Integer.class)
                 .block();
 
-        assert lowestRoom != null;
+        int reviewCount = webClient.get()
+                .uri("http://localhost:8080/api/reviews/getReviewCountByHotelId/" + hotel.getId())
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .block();
+
+        ReviewResponse averageReview = webClient.get()
+                .uri("http://localhost:8080/api/reviews/getReviewAveragePointsByHotelId/" + hotel.getId())
+                .retrieve()
+                .bodyToMono(ReviewResponse.class)
+                .block();
+
+        if (averageReview == null) {
+            log.warn("No review data found for hotel id: {}", hotel.getId());
+            averageReview = new ReviewResponse(); // or handle appropriately
+        }
 
         return HotelResponse.builder()
                 .id(hotel.getId())
@@ -95,35 +114,37 @@ public class HotelService {
                 .amenities(hotel.getAmenities())
                 .policies(hotel.getPolicies())
                 .otherNames(hotel.getOtherNames())
+                .roomAmenities(hotel.getRoomAmenities())
+                .extraOptions(hotel.getExtraOptions())
                 .roomCount(roomCount)
-                .roomLowestDiscount(lowestRoom.getDiscount())
                 .roomLowestOriginPrice(lowestRoom.getOriginPrice())
+                .roomLowestDiscountPercentage(lowestRoom.getDiscountPercentage())
+                .roomLowestDiscountedPrice(lowestRoom.getDiscountedPrice())
                 .roomLowestTaxPercentage(lowestRoom.getTaxPercentage())
-                .roomLowestTax(lowestRoom.getTax())
-                .roomLowestDiscountPrice(lowestRoom.getDiscountPrice())
                 .roomLowestTotalPrice(lowestRoom.getTotalPrice())
-                .reviewCount(getReviewCountByHotelId(hotel.getId()))
-                .reviewAverageCleanPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageCleanPoint())
-                .reviewAverageServicePoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageServicePoint())
-                .reviewAverageStaffPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageStaffPoint())
-                .reviewAverageFacilityPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageFacilityPoint())
-                .reviewAverageEcofriendlyPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageEcofriendlyPoint())
-                .reviewAverageOverallPoint(getReviewAveragePointsByHotelId(hotel.getId()).getReviewAverageOverallPoint())
+                .reviewCount(reviewCount)
+                .reviewAverageCleanPoint(averageReview.getCleanPoint())
+                .reviewAverageServicePoint(averageReview.getServicePoint())
+                .reviewAverageStaffPoint(averageReview.getStaffPoint())
+                .reviewAverageFacilityPoint(averageReview.getFacilityPoint())
+                .reviewAverageEnvironmentPoint(averageReview.getEnvironmentPoint())
+                .reviewAverageOverallPoint(averageReview.getOverallPoint())
+                .reviewAveragePointCategory(averageReview.getPointCategory())
                 .build();
     }
 
-    public List<HotelResponse> search(String query, String sortBy, String sortOrder, Integer minPrice, Integer maxPrice, Integer minRatingScore, List<Integer> stars) {
-        List<HotelResponse> searchResults = hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
+    public List<HotelResponse> search(String query, String sortBy, String sortOrder, Integer minPrice, Integer maxPrice, Integer minRatingScore, List<Integer> stars) throws IllegalArgumentException {
+        List<Hotel> searchResults = hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
 
         // Apply filters
         if (minPrice != null) {
             searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getRoomLowestDiscountPrice() >= minPrice)
+                    .filter(hotel -> hotel.getRoomLowestDiscountedPrice() >= minPrice)
                     .collect(Collectors.toList());
         }
         if (maxPrice != null) {
             searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getRoomLowestDiscountPrice() <= maxPrice)
+                    .filter(hotel -> hotel.getRoomLowestDiscountedPrice() <= maxPrice)
                     .collect(Collectors.toList());
         }
         if (minRatingScore != null) {
@@ -139,41 +160,21 @@ public class HotelService {
 
         // Apply sorting
         if (sortBy != null && sortOrder != null) {
-            Comparator<HotelResponse> comparator;
-            switch (sortBy) {
-                case "discountPrice":
-                    comparator = Comparator.comparing(HotelResponse::getRoomLowestDiscountPrice);
-                    break;
-                case "ratingScore":
-                    comparator = Comparator.comparing(HotelResponse::getReviewAverageOverallPoint);
-                    break;
+            Comparator<Hotel> comparator = switch (sortBy) {
+                case "discountPrice" -> Comparator.comparing(Hotel::getRoomLowestDiscountedPrice);
+                case "ratingScore" -> Comparator.comparing(Hotel::getReviewAverageOverallPoint);
                 // Add more cases for other sort criteria
-                default:
-                    throw new IllegalArgumentException("Invalid sort criteria: " + sortBy);
-            }
+                default -> (hotel1, hotel2) -> 0;
+            };
             if ("desc".equalsIgnoreCase(sortOrder)) {
                 comparator = comparator.reversed();
             }
             searchResults.sort(comparator);
         }
 
-        return searchResults;
-    }
-
-    public Integer getReviewCountByHotelId(String hotelId) {
-        return webClient.get()
-                .uri("http://localhost:8080/api/reviews/getReviewCountByHotelId/" + hotelId)
-                .retrieve()
-                .bodyToMono(Integer.class)
-                .block();
-    }
-
-    public HotelResponse getReviewAveragePointsByHotelId(String hotelId) {
-        return webClient.get()
-                .uri("http://localhost:8080/api/reviews/getReviewAveragePointsByHotelId/" + hotelId)
-                .retrieve()
-                .bodyToMono(HotelResponse.class)
-                .block();
+        return searchResults.stream()
+                .map(this::mapToHotelResponse)
+                .toList();
     }
 
     @Transactional
@@ -198,6 +199,8 @@ public class HotelService {
         hotel.setAmenities(hotelRequest.getAmenities());
         hotel.setPolicies(hotelRequest.getPolicies());
         hotel.setOtherNames(hotelRequest.getOtherNames());
+        hotel.setRoomAmenities(hotelRequest.getRoomAmenities());
+        hotel.setExtraOptions(hotelRequest.getExtraOptions());
 
         hotelRepository.save(hotel);
         log.info("Hotel {} is updated", hotel.getId());
@@ -206,8 +209,18 @@ public class HotelService {
     }
 
     public List<HotelResponse> getHotelsByUserId(String userId) {
-        List<Hotel> hotels = hotelRepository.findByCreatedBy(userId);
-        return hotels.stream().map(this::mapToHotelResponse).toList();
+        return hotelRepository.findByCreatedBy(userId).stream()
+                .map(this::mapToHotelResponse)
+                .toList();
     }
 
+    public Integer getCountByCreatedBy(String createdBy) {
+        return hotelRepository.countByCreatedBy(createdBy);
+    }
+
+    public List<Hotel.RoomAmenities> getAllRoomAmenitiesByHotelId(String hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new IllegalArgumentException("Hotel with id " + hotelId + " does not exist"));
+        return hotel.getRoomAmenities();
+    }
 }
