@@ -12,12 +12,11 @@ import java.util.List;
 
 @Repository
 public interface RoomRepository extends MongoRepository<Room, String> {
-    @Query("{ 'availableDates': { $elemMatch: { 'from': { $lte: ?0 }, 'to': { $gte: ?1 } } } }")
-    List<RoomResponse> findByAvailableDatesBetween(LocalDateTime from, LocalDateTime to);
-
     List<Room> findByHotelId(String hotelId);
 
-    Room findFirstByOrderByDiscountPriceAsc(String hotelId);
+    Room findFirstByOrderByDiscountedPriceAsc(String hotelId);
 
     Integer countByHotelId(String hotelId);
+
+
 }

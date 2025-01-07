@@ -22,44 +22,46 @@ public class Room {
     @Id
     private String id;
     private String hotelId;
-    private String image;
     private String roomName;
+    private String roomNumber;
     private String roomType;
-    private Integer nightlyPrice;
     private Integer numOfBeds;
-    private Integer numOfGuests;
+    private String bedType;
+    private Integer maxAdults;
+    private Integer maxChildren;
+
+    private List<String> images;
     private String description;
-    private ArrayList<String> amenities;
-    private Integer breakfastPrice;
-    private Integer breakfastFor2Price;
-    private Double discount;
-    private Integer numOfRooms;
+    private List<Amenities> amenities;
+
+    private List<ExtraOptions> extraOptions;
+
     private Integer originPrice;
+    private Double discountPercentage;
+    private Integer discountedPrice;
     private Double taxPercentage;
-    private Integer tax;
-    private Integer extraFee;
-    private Integer discountPrice;
     private Integer totalPrice;
-    private ArrayList<AvailableDate> availableDates;
 
     @Data
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class AvailableDate {
-        private LocalDateTime from;
-        private LocalDateTime to;
+    public static class Amenities {
+        private String amenityType;
+        private List<String> amenityName;
     }
 
-    public Integer getDiscountPrice() {
-        return (int) (originPrice * (1 - discount));
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ExtraOptions {
+        private String optionName;
+        private Integer optionPrice;
     }
 
-    public Integer getTaxPrice() {
-        return (int) (getDiscountPrice() * (1 + taxPercentage));
-    }
+    //get from Booking
+    private LocalDateTime checkinDate;
+    private LocalDateTime checkoutDate;
 
-    public Integer getTotalPrice() {
-        return getDiscountPrice() + getTaxPrice() + extraFee;
-    }
 }

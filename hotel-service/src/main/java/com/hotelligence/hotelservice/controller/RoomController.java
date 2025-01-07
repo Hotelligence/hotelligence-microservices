@@ -2,6 +2,7 @@ package com.hotelligence.hotelservice.controller;
 
 import com.hotelligence.hotelservice.dto.RoomRequest;
 import com.hotelligence.hotelservice.dto.RoomResponse;
+import com.hotelligence.hotelservice.model.Room;
 import com.hotelligence.hotelservice.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,10 +18,16 @@ public class RoomController {
 
     private final RoomService roomService;
 
-    @PostMapping(path = "createRoom/{hotelId}")
+    @PostMapping(path = "/createRoom/{hotelId}")
     @ResponseStatus(HttpStatus.CREATED)
     public void createRoom(@PathVariable String hotelId, @RequestBody RoomRequest roomRequest){
         roomService.createRoom(hotelId, roomRequest);
+    }
+
+    @PatchMapping(path = "/updateRoom/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateRoom(@PathVariable("id") String roomId, @RequestBody RoomRequest roomRequest){
+        roomService.updateRoom(roomId, roomRequest);
     }
 
     @GetMapping(path = "/getAll")
@@ -59,4 +66,21 @@ public class RoomController {
         return roomService.getRoomCountByHotelId(hotelId);
     }
 
+    @GetMapping(path = "/getAvailableRooms/{hotelId}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RoomResponse> getAvailableRooms(@PathVariable("hotelId") String hotelId, @RequestParam LocalDateTime fromDate, @RequestParam LocalDateTime toDate){
+        return roomService.getAvailableRooms(hotelId, fromDate, toDate);
+    }
+
+//    @GetMapping(path = "/getAllAmenitiesByHotelId/{hotelId}")
+//    @ResponseStatus(HttpStatus.OK)
+//    public List<Room.Amenities> getAllAmenitiesByHotelId(@PathVariable("hotelId") String hotelId){
+//        return roomService.getAllAmenitiesByHotelId(hotelId);
+//    }
+
+    @DeleteMapping(path = "/deleteRoom/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteRoom(@PathVariable("id") String roomId){
+        roomService.deleteRoom(roomId);
+    }
 }
