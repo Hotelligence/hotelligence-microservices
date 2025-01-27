@@ -4,7 +4,6 @@ import com.hotelligence.hotelservice.dto.HotelRequest;
 import com.hotelligence.hotelservice.dto.HotelResponse;
 import com.hotelligence.hotelservice.dto.RoomResponse;
 import com.hotelligence.hotelservice.model.Hotel;
-import com.hotelligence.hotelservice.model.Room;
 import com.hotelligence.hotelservice.repository.HotelRepository;
 import com.hotelligence.reviewservice.dto.ReviewResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,6 @@
 package com.hotelligence.hotelservice.dto;
 
 import com.hotelligence.hotelservice.model.Hotel;
-import com.hotelligence.hotelservice.model.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,12 +1,9 @@
 package com.hotelligence.hotelservice.repository;
 
-import com.hotelligence.hotelservice.dto.RoomResponse;
 import com.hotelligence.hotelservice.model.Room;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
