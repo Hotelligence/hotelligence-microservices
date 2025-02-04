@@ -68,12 +68,17 @@ public class FavoriteService {
                 .bodyToMono(Hotel.class)
                 .block();
 
+        //check if the hotel is already exist in the favorite list, return
+        if (favoriteList.getFavoriteHotels().stream().anyMatch(h -> h.getId().equals(hotelId))) {
+            log.info("Hotel already exists in favorite list for user: {}", userId);
+            return mapToFavoriteResponse(favoriteList);
+        }
+
         if (hotel == null) {
             log.info("Hotel not found");
             return null;
         }
 
-        assert favoriteList != null;
         favoriteList.getFavoriteHotels().add(hotel);
         favoriteRepository.save(favoriteList);
         log.info("Hotel added to favorite list for user: {}", userId);
@@ -92,5 +97,15 @@ public class FavoriteService {
 
     }
 
+    public void removeAllHotelsFromFavoriteList(String userId) {
+        Favorite favorite = favoriteRepository.findByUserId(userId);
+        if (favorite == null) {
+            log.info("User does not have a favorite list");
+            return;
+        }
+        favorite.getFavoriteHotels().clear();
+        favoriteRepository.save(favorite);
+        log.info("All hotels removed from favorite list for user: {}", userId);
+    }
 
 }

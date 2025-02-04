@@ -37,4 +37,10 @@ public class FavoriteController {
     public void removeHotelFromFavoriteList(@PathVariable("userId") String userId, @PathVariable("hotelId") String hotelId) {
         favoriteService.removeHotelFromFavoriteList(userId, hotelId);
     }
+
+    @PatchMapping(path = "/removeAllHotelsFromFavoriteList/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void removeAllHotelsFromFavoriteList(@PathVariable("userId") String userId) {
+        favoriteService.removeAllHotelsFromFavoriteList(userId);
+    }
 }
