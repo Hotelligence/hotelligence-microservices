@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ComparisonRequest {
     private String userId;
-    private String hotelId;
+    private String roomId;
 }

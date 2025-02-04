@@ -1,6 +1,6 @@
 package com.hotelligence.hotelservice.dto;
 
-import com.hotelligence.hotelservice.model.Hotel;
+import com.hotelligence.hotelservice.model.Room;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +15,5 @@ import java.util.List;
 public class ComparisonResponse {
     private String id;
     private String userId;
-    private List<Hotel> comparedHotels;
+    private List<Room> comparedRooms;
 }

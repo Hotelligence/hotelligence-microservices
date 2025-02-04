@@ -2,7 +2,7 @@ package com.hotelligence.hotelservice.service;
 
 import com.hotelligence.hotelservice.dto.ComparisonResponse;
 import com.hotelligence.hotelservice.model.Comparison;
-import com.hotelligence.hotelservice.model.Hotel;
+import com.hotelligence.hotelservice.model.Room;
 import com.hotelligence.hotelservice.repository.ComparisonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class ComparisonService {
         }
         Comparison comparison = Comparison.builder()
                                     .userId(userId)
-                                    .comparedHotels(new ArrayList<>())
+                                    .comparedRooms(new ArrayList<>())
                                     .build();
         comparisonRepository.save(comparison);
         log.info("Comparison list created for user: {}", userId);
@@ -37,7 +37,7 @@ public class ComparisonService {
         return ComparisonResponse.builder()
                 .id(comparison.getId())
                 .userId(comparison.getUserId())
-                .comparedHotels(comparison.getComparedHotels())
+                .comparedRooms(comparison.getComparedRooms())
                 .build();
     }
 
@@ -54,7 +54,7 @@ public class ComparisonService {
         return mapToComparisonResponse(comparison);
     }
 
-    public ComparisonResponse addHotelToComparisonList(String userId, String hotelId) {
+    public ComparisonResponse addRoomToComparisonList(String userId, String roomId) {
         if (comparisonRepository.findByUserId(userId) == null) {
             log.info("User does not have a comparison list");
             createComparisonList(userId);
@@ -62,21 +62,30 @@ public class ComparisonService {
 
         Comparison comparisonList = comparisonRepository.findByUserId(userId);
 
-        Hotel hotel = webClient.get()
-                .uri("http://localhost:8080/api/hotels/getHotelById/" + hotelId)
+        Room room = webClient.get()
+                .uri("http://localhost:8080/api/rooms/getRoomById/" + roomId)
                 .retrieve()
-                .bodyToMono(Hotel.class)
+                .bodyToMono(Room.class)
                 .block();
-
-        if (hotel == null) {
-            log.info("Hotel not found");
-            return null;
-        }
 
         assert comparisonList != null;
 
-        if (comparisonList.getComparedHotels().size() < 3) {
-            comparisonList.getComparedHotels().add(hotel);
+        if (!comparisonList.getComparedRooms().isEmpty()) {
+            assert room != null;
+            if (!comparisonList.getComparedRooms().get(0).getHotelId().equals(room.getHotelId())) {
+                log.info("Room added is not in the same hotel");
+                return mapToComparisonResponse(comparisonList);
+            }
+        }
+
+        //check if the room is already in the comparison list
+        if (comparisonList.getComparedRooms().stream().anyMatch(r -> r.getId().equals(roomId))) {
+            log.info("Room is already in the comparison list");
+            return mapToComparisonResponse(comparisonList);
+        }
+
+        if (comparisonList.getComparedRooms().size() < 3) {
+            comparisonList.getComparedRooms().add(room);
         }
         else {
             log.info("Comparison list is full");
@@ -84,11 +93,11 @@ public class ComparisonService {
         }
 
         comparisonRepository.save(comparisonList);
-        log.info("Hotel added to comparison list for user: {}", userId);
+        log.info("Room added to comparison list for user: {}", userId);
         return mapToComparisonResponse(comparisonList);
     }
 
-    public void removeHotelFromComparisonList(String userId, String hotelId) {
+    public void removeRoomFromComparisonList(String userId, String roomId) {
         Comparison comparisonList = comparisonRepository.findByUserId(userId);
 
         if (comparisonList == null) {
@@ -96,8 +105,21 @@ public class ComparisonService {
             return;
         }
 
-        comparisonList.getComparedHotels().removeIf(hotel -> hotel.getId().equals(hotelId));
+        comparisonList.getComparedRooms().removeIf(room -> room.getId().equals(roomId));
         comparisonRepository.save(comparisonList);
         log.info("Hotel removed from comparison list for user: {}", userId);
+    }
+
+    public void removeAllRoomsFromComparisonList(String userId) {
+        Comparison comparisonList = comparisonRepository.findByUserId(userId);
+
+        if (comparisonList == null) {
+            log.info("User does not have a comparison list");
+            return;
+        }
+
+        comparisonList.getComparedRooms().clear();
+        comparisonRepository.save(comparisonList);
+        log.info("All rooms removed from comparison list for user: {}", userId);
     }
 }

@@ -18,5 +18,5 @@ public class Comparison {
     @Id
     private String id;
     private String userId;
-    private List<Hotel> comparedHotels;
+    private List<Room> comparedRooms;
 }
