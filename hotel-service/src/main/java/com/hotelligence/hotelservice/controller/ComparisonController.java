@@ -27,19 +27,19 @@ public class ComparisonController {
         return comparisonService.getComparisonListByUserId(userId);
     }
 
-    @PatchMapping(path = "/addToComparisonList/{userId}/{roomId}")
+    @PostMapping(path = "/addToComparisonList/{userId}/{roomId}")
     @ResponseStatus(HttpStatus.OK)
-    public ComparisonResponse addRoomToComparisonList(@PathVariable("userId") String userId, @PathVariable("roomId") String roomId) {
-        return comparisonService.addRoomToComparisonList(userId, roomId);
+    public void addRoomToComparisonList(@PathVariable("userId") String userId, @PathVariable("roomId") String roomId) {
+        comparisonService.addRoomToComparisonList(userId, roomId);
     }
 
-    @PatchMapping(path = "/removeFromComparisonList/{userId}/{roomId}")
+    @PostMapping(path = "/removeFromComparisonList/{userId}/{roomId}")
     @ResponseStatus(HttpStatus.OK)
     public void removeRoomFromComparisonList(@PathVariable("userId") String userId, @PathVariable("roomId") String roomId) {
         comparisonService.removeRoomFromComparisonList(userId, roomId);
     }
 
-    @PatchMapping(path = "/removeAllRoomsFromComparisonList/{userId}")
+    @PostMapping(path = "/removeAllRoomsFromComparisonList/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void removeAllRoomsFromComparisonList(@PathVariable("userId") String userId) {
         comparisonService.removeAllRoomsFromComparisonList(userId);

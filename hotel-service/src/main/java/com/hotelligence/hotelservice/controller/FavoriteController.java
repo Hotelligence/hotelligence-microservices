@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/favorites")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class FavoriteController {
     private final FavoriteService favoriteService;
 
@@ -26,19 +27,19 @@ public class FavoriteController {
         return favoriteService.getFavoriteListByUserId(userId);
     }
 
-    @PatchMapping(path = "/addToFavoriteList/{userId}/{hotelId}")
+    @PostMapping(path = "/addToFavoriteList/{userId}/{hotelId}")
     @ResponseStatus(HttpStatus.OK)
-    public FavoriteResponse addHotelToFavoriteList(@PathVariable("userId") String userId, @PathVariable("hotelId") String hotelId) {
-        return favoriteService.addHotelToFavoriteList(userId, hotelId);
+    public void addHotelToFavoriteList(@PathVariable("userId") String userId, @PathVariable("hotelId") String hotelId) {
+        favoriteService.addHotelToFavoriteList(userId, hotelId);
     }
 
-    @PatchMapping(path = "/removeFromFavoriteList/{userId}/{hotelId}")
+    @PostMapping(path = "/removeFromFavoriteList/{userId}/{hotelId}")
     @ResponseStatus(HttpStatus.OK)
     public void removeHotelFromFavoriteList(@PathVariable("userId") String userId, @PathVariable("hotelId") String hotelId) {
         favoriteService.removeHotelFromFavoriteList(userId, hotelId);
     }
 
-    @PatchMapping(path = "/removeAllHotelsFromFavoriteList/{userId}")
+    @PostMapping(path = "/removeAllHotelsFromFavoriteList/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public void removeAllHotelsFromFavoriteList(@PathVariable("userId") String userId) {
         favoriteService.removeAllHotelsFromFavoriteList(userId);

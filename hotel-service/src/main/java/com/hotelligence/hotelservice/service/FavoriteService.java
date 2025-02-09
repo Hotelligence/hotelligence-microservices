@@ -6,8 +6,11 @@ import com.hotelligence.hotelservice.model.Hotel;
 import com.hotelligence.hotelservice.repository.FavoriteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +57,8 @@ public class FavoriteService {
         return mapToFavoriteResponse(favorite);
     }
 
-    public FavoriteResponse addHotelToFavoriteList(String userId, String hotelId) {
+    @Transactional
+    public void addHotelToFavoriteList(String userId, String hotelId) {
         if (favoriteRepository.findByUserId(userId) == null) {
             log.info("User does not have a favorite list");
             createFavoriteList(userId);
@@ -71,41 +75,46 @@ public class FavoriteService {
         //check if the hotel is already exist in the favorite list, return
         if (favoriteList.getFavoriteHotels().stream().anyMatch(h -> h.getId().equals(hotelId))) {
             log.info("Hotel already exists in favorite list for user: {}", userId);
-            return mapToFavoriteResponse(favoriteList);
+//            return mapToFavoriteResponse(favoriteList);
         }
 
         if (hotel == null) {
             log.info("Hotel not found");
-            return null;
+//            return null;
         }
 
         favoriteList.getFavoriteHotels().add(hotel);
         favoriteRepository.save(favoriteList);
         log.info("Hotel added to favorite list for user: {}", userId);
-        return mapToFavoriteResponse(favoriteList);
+//        return mapToFavoriteResponse(favoriteList);
     }
 
+    @Transactional
     public void removeHotelFromFavoriteList(String userId, String hotelId) {
         Favorite favorite = favoriteRepository.findByUserId(userId);
         if (favorite == null) {
             log.info("User does not have a favorite list");
-            return;
+//            return null;
         }
+        assert favorite != null;
         favorite.getFavoriteHotels().removeIf(hotel -> hotel.getId().equals(hotelId));
         favoriteRepository.save(favorite);
         log.info("Hotel removed from favorite list for user: {}", userId);
-
+//        return mapToFavoriteResponse(favorite);
     }
 
+    @Transactional
     public void removeAllHotelsFromFavoriteList(String userId) {
         Favorite favorite = favoriteRepository.findByUserId(userId);
         if (favorite == null) {
             log.info("User does not have a favorite list");
-            return;
+//            return null;
         }
+        assert favorite != null;
         favorite.getFavoriteHotels().clear();
         favoriteRepository.save(favorite);
         log.info("All hotels removed from favorite list for user: {}", userId);
+//        return mapToFavoriteResponse(favorite);
     }
 
 }

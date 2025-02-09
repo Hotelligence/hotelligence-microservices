@@ -54,7 +54,7 @@ public class ComparisonService {
         return mapToComparisonResponse(comparison);
     }
 
-    public ComparisonResponse addRoomToComparisonList(String userId, String roomId) {
+    public void addRoomToComparisonList(String userId, String roomId) {
         if (comparisonRepository.findByUserId(userId) == null) {
             log.info("User does not have a comparison list");
             createComparisonList(userId);
@@ -74,14 +74,14 @@ public class ComparisonService {
             assert room != null;
             if (!comparisonList.getComparedRooms().get(0).getHotelId().equals(room.getHotelId())) {
                 log.info("Room added is not in the same hotel");
-                return mapToComparisonResponse(comparisonList);
+//                return mapToComparisonResponse(comparisonList);
             }
         }
 
         //check if the room is already in the comparison list
         if (comparisonList.getComparedRooms().stream().anyMatch(r -> r.getId().equals(roomId))) {
             log.info("Room is already in the comparison list");
-            return mapToComparisonResponse(comparisonList);
+//            return mapToComparisonResponse(comparisonList);
         }
 
         if (comparisonList.getComparedRooms().size() < 3) {
@@ -89,12 +89,12 @@ public class ComparisonService {
         }
         else {
             log.info("Comparison list is full");
-            return mapToComparisonResponse(comparisonList);
+//            return mapToComparisonResponse(comparisonList);
         }
 
         comparisonRepository.save(comparisonList);
         log.info("Room added to comparison list for user: {}", userId);
-        return mapToComparisonResponse(comparisonList);
+//        return mapToComparisonResponse(comparisonList);
     }
 
     public void removeRoomFromComparisonList(String userId, String roomId) {
