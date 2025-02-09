@@ -8,6 +8,7 @@ import com.hotelligence.hotelservice.repository.HotelRepository;
 import com.hotelligence.reviewservice.dto.ReviewResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -76,6 +77,7 @@ public class HotelService {
                 .bodyToMono(Integer.class)
                 .block();
 
+
         int reviewCount = webClient.get()
                 .uri("http://localhost:8080/api/reviews/getReviewCountByHotelId/" + hotel.getId())
                 .retrieve()
@@ -133,47 +135,33 @@ public class HotelService {
     }
 
     public List<HotelResponse> search(String query, String sortBy, String sortOrder, Integer minPrice, Integer maxPrice, Integer minRatingScore, List<Integer> stars) throws IllegalArgumentException {
-        List<Hotel> searchResults = hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
-
-        // Apply filters
-        if (minPrice != null) {
-            searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getRoomLowestDiscountedPrice() >= minPrice)
-                    .collect(Collectors.toList());
-        }
-        if (maxPrice != null) {
-            searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getRoomLowestDiscountedPrice() <= maxPrice)
-                    .collect(Collectors.toList());
-        }
-        if (minRatingScore != null) {
-            searchResults = searchResults.stream()
-                    .filter(hotel -> hotel.getReviewAverageOverallPoint() >= minRatingScore)
-                    .collect(Collectors.toList());
-        }
-        if (stars != null && !stars.isEmpty()) {
-            searchResults = searchResults.stream()
-                    .filter(hotel -> stars.contains(hotel.getStar()))
-                    .collect(Collectors.toList());
-        }
-
-        // Apply sorting
-        if (sortBy != null && sortOrder != null) {
-            Comparator<Hotel> comparator = switch (sortBy) {
-                case "discountPrice" -> Comparator.comparing(Hotel::getRoomLowestDiscountedPrice);
-                case "ratingScore" -> Comparator.comparing(Hotel::getReviewAverageOverallPoint);
-                // Add more cases for other sort criteria
-                default -> (hotel1, hotel2) -> 0;
-            };
-            if ("desc".equalsIgnoreCase(sortOrder)) {
-                comparator = comparator.reversed();
-            }
-            searchResults.sort(comparator);
-        }
-
-        return searchResults.stream()
+        List<Hotel> hotels = hotelRepository.findByHotelNameContainingIgnoreCaseOrProvinceContainingIgnoreCaseOrCityContainingIgnoreCase(query, query, query);
+        List<HotelResponse> hotelResponses = hotels.stream()
                 .map(this::mapToHotelResponse)
-                .toList();
+                .filter(hotelResponse -> minPrice == null || hotelResponse.getRoomLowestTotalPrice() >= minPrice)
+                .filter(hotelResponse -> maxPrice == null || hotelResponse.getRoomLowestTotalPrice() <= maxPrice)
+                .filter(hotelResponse -> minRatingScore == null || hotelResponse.getReviewAverageOverallPoint() >= minRatingScore)
+                .filter(hotelResponse -> stars == null || stars.isEmpty() || stars.contains(hotelResponse.getStar()))
+                .collect(Collectors.toList());
+
+        if (sortBy != null) {
+            switch (sortBy) {
+                case "discountPrice":
+                    hotelResponses.sort(Comparator.comparing(HotelResponse::getRoomLowestTotalPrice));
+                    break;
+                case "ratingScore":
+                    hotelResponses.sort(Comparator.comparing(HotelResponse::getReviewAverageOverallPoint));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid sortBy parameter");
+            }
+        }
+
+        if (sortOrder != null && sortOrder.equals("desc")) {
+            Collections.reverse(hotelResponses);
+        }
+
+        return hotelResponses;
     }
 
     @Transactional
