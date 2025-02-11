@@ -59,12 +59,11 @@ public class FavoriteService {
 
     @Transactional
     public void addHotelToFavoriteList(String userId, String hotelId) {
-        if (favoriteRepository.findByUserId(userId) == null) {
-            log.info("User does not have a favorite list");
-            createFavoriteList(userId);
-        }
-
         Favorite favoriteList = favoriteRepository.findByUserId(userId);
+        if (favoriteList == null) {
+            createFavoriteList(userId);
+            favoriteList = favoriteRepository.findByUserId(userId);
+        }
 
         Hotel hotel = webClient.get()
                 .uri("http://localhost:8080/api/hotels/getHotelById/" + hotelId)
@@ -72,21 +71,18 @@ public class FavoriteService {
                 .bodyToMono(Hotel.class)
                 .block();
 
-        //check if the hotel is already exist in the favorite list, return
-        if (favoriteList.getFavoriteHotels().stream().anyMatch(h -> h.getId().equals(hotelId))) {
-            log.info("Hotel already exists in favorite list for user: {}", userId);
-//            return mapToFavoriteResponse(favoriteList);
-        }
-
         if (hotel == null) {
             log.info("Hotel not found");
-//            return null;
+            return;
         }
 
-        favoriteList.getFavoriteHotels().add(hotel);
-        favoriteRepository.save(favoriteList);
-        log.info("Hotel added to favorite list for user: {}", userId);
-//        return mapToFavoriteResponse(favoriteList);
+        if (favoriteList.getFavoriteHotels().stream().noneMatch(h -> h.getId().equals(hotelId))) {
+            favoriteList.getFavoriteHotels().add(hotel);
+            favoriteRepository.save(favoriteList);
+            log.info("Hotel added to favorite list for user: {}", userId);
+        } else {
+            log.info("Hotel already exists in favorite list for user: {}", userId);
+        }
     }
 
     @Transactional
@@ -94,13 +90,16 @@ public class FavoriteService {
         Favorite favorite = favoriteRepository.findByUserId(userId);
         if (favorite == null) {
             log.info("User does not have a favorite list");
-//            return null;
+            return;
         }
-        assert favorite != null;
-        favorite.getFavoriteHotels().removeIf(hotel -> hotel.getId().equals(hotelId));
-        favoriteRepository.save(favorite);
-        log.info("Hotel removed from favorite list for user: {}", userId);
-//        return mapToFavoriteResponse(favorite);
+
+        boolean removed = favorite.getFavoriteHotels().removeIf(hotel -> hotel.getId().equals(hotelId));
+        if (removed) {
+            favoriteRepository.save(favorite);
+            log.info("Hotel removed from favorite list for user: {}", userId);
+        } else {
+            log.info("Hotel not found in favorite list for user: {}", userId);
+        }
     }
 
     @Transactional
@@ -108,13 +107,11 @@ public class FavoriteService {
         Favorite favorite = favoriteRepository.findByUserId(userId);
         if (favorite == null) {
             log.info("User does not have a favorite list");
-//            return null;
+            return;
         }
-        assert favorite != null;
+
         favorite.getFavoriteHotels().clear();
         favoriteRepository.save(favorite);
         log.info("All hotels removed from favorite list for user: {}", userId);
-//        return mapToFavoriteResponse(favorite);
     }
-
 }

@@ -7,6 +7,7 @@ import com.hotelligence.hotelservice.repository.ComparisonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
@@ -54,13 +55,14 @@ public class ComparisonService {
         return mapToComparisonResponse(comparison);
     }
 
+    @Transactional
     public void addRoomToComparisonList(String userId, String roomId) {
-        if (comparisonRepository.findByUserId(userId) == null) {
-            log.info("User does not have a comparison list");
-            createComparisonList(userId);
-        }
-
         Comparison comparisonList = comparisonRepository.findByUserId(userId);
+
+        if (comparisonList == null) {
+            createComparisonList(userId);
+            comparisonList = comparisonRepository.findByUserId(userId);
+        }
 
         Room room = webClient.get()
                 .uri("http://localhost:8080/api/rooms/getRoomById/" + roomId)
@@ -68,35 +70,33 @@ public class ComparisonService {
                 .bodyToMono(Room.class)
                 .block();
 
-        assert comparisonList != null;
-
-        if (!comparisonList.getComparedRooms().isEmpty()) {
-            assert room != null;
-            if (!comparisonList.getComparedRooms().get(0).getHotelId().equals(room.getHotelId())) {
-                log.info("Room added is not in the same hotel");
-//                return mapToComparisonResponse(comparisonList);
-            }
+        if (room == null) {
+            log.info("Room not found");
+            return;
         }
 
-        //check if the room is already in the comparison list
+//        if (!comparisonList.getComparedRooms().isEmpty() &&
+//            !comparisonList.getComparedRooms().get(0).getHotelId().equals(room.getHotelId())) {
+//            log.info("Room added is not in the same hotel");
+//            return;
+//        }
+
         if (comparisonList.getComparedRooms().stream().anyMatch(r -> r.getId().equals(roomId))) {
             log.info("Room is already in the comparison list");
-//            return mapToComparisonResponse(comparisonList);
+            return;
         }
 
-        if (comparisonList.getComparedRooms().size() < 3) {
-            comparisonList.getComparedRooms().add(room);
-        }
-        else {
+        if (comparisonList.getComparedRooms().size() >= 3) {
             log.info("Comparison list is full");
-//            return mapToComparisonResponse(comparisonList);
+            return;
         }
 
+        comparisonList.getComparedRooms().add(room);
         comparisonRepository.save(comparisonList);
         log.info("Room added to comparison list for user: {}", userId);
-//        return mapToComparisonResponse(comparisonList);
     }
 
+    @Transactional
     public void removeRoomFromComparisonList(String userId, String roomId) {
         Comparison comparisonList = comparisonRepository.findByUserId(userId);
 
@@ -105,11 +105,16 @@ public class ComparisonService {
             return;
         }
 
-        comparisonList.getComparedRooms().removeIf(room -> room.getId().equals(roomId));
-        comparisonRepository.save(comparisonList);
-        log.info("Hotel removed from comparison list for user: {}", userId);
+        boolean removed = comparisonList.getComparedRooms().removeIf(room -> room.getId().equals(roomId));
+        if (removed) {
+            comparisonRepository.save(comparisonList);
+            log.info("Room removed from comparison list for user: {}", userId);
+        } else {
+            log.info("Room not found in comparison list for user: {}", userId);
+        }
     }
 
+    @Transactional
     public void removeAllRoomsFromComparisonList(String userId) {
         Comparison comparisonList = comparisonRepository.findByUserId(userId);
 
@@ -118,8 +123,12 @@ public class ComparisonService {
             return;
         }
 
-        comparisonList.getComparedRooms().clear();
-        comparisonRepository.save(comparisonList);
-        log.info("All rooms removed from comparison list for user: {}", userId);
+        if (!comparisonList.getComparedRooms().isEmpty()) {
+            comparisonList.getComparedRooms().clear();
+            comparisonRepository.save(comparisonList);
+            log.info("All rooms removed from comparison list for user: {}", userId);
+        } else {
+            log.info("Comparison list is already empty for user: {}", userId);
+        }
     }
 }
