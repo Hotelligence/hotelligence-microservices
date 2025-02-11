@@ -22,6 +22,7 @@ public class BookingRequest {
     private String email;
     private String phoneNumber;
     private String paymentMethod;
+    private Integer paymentAmount;
 
     private LocalDateTime bookingDate;
     private LocalDateTime checkinDate;

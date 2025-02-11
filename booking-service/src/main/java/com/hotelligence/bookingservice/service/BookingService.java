@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,10 +21,23 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
-    private final WebClient.Builder webClient;
+    private final WebClient webClient;
+    private final Map<String, String> otpStorage = new HashMap<>();
 
+    @Transactional
+    public void initiateBooking(BookingRequest bookingRequest) {
+        String otp = generateOTP();
+        otpStorage.put(bookingRequest.getEmail(), otp);
+        sendOtpEmail(bookingRequest.getEmail(), otp);
+        log.info("OTP sent to email: {}", bookingRequest.getEmail());
+    }
 
-    public void placeBooking(String roomId, BookingRequest bookingRequest) {
+    @Transactional
+    public void placeBooking(String roomId, BookingRequest bookingRequest, String otp) {
+        if (!verifyOtp(bookingRequest.getEmail(), otp)) {
+            throw new IllegalArgumentException("Invalid OTP");
+        }
+
         Booking booking = Booking.builder()
                 .userId(bookingRequest.getUserId())
                 .hotelId(bookingRequest.getHotelId())
@@ -32,6 +47,7 @@ public class BookingService {
                 .email(bookingRequest.getEmail())
                 .phoneNumber(bookingRequest.getPhoneNumber())
                 .paymentMethod(bookingRequest.getPaymentMethod())
+                .paymentAmount(bookingRequest.getPaymentAmount())
                 .bookingDate(LocalDateTime.now())
                 .checkinDate(bookingRequest.getCheckinDate())
                 .checkoutDate(bookingRequest.getCheckoutDate())
@@ -41,8 +57,36 @@ public class BookingService {
 
         bookingRepository.save(booking);
 
+        sendCongratulationsEmail(booking.getEmail(), booking.getFullName(), booking.getId());
+
         log.info("Place booking successfully");
     }
+
+    private boolean verifyOtp(String email, String otp) {
+        return otp.equals(otpStorage.get(email));
+    }
+
+    private void sendOtpEmail(String toEmail, String otp) {
+        webClient.post()
+                .uri("http://localhost:8080/api/emails/sendOtpEmail/{toEmail}/{otp}", toEmail, otp)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    private void sendCongratulationsEmail(String toEmail, String fullName, String bookingId) {
+        webClient.post()
+                .uri("http://localhost:8080/api/emails/sendCongratulationsEmail/{toEmail}/{fullName}/{bookingId}", toEmail, fullName, bookingId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    private String generateOTP() {
+        int otp = (int) (Math.random() * 900000) + 100000;
+        return String.valueOf(otp);
+    }
+
 
     public List<BookingResponse> getAllBookings() {
         List<Booking> bookings = bookingRepository.findAll();
@@ -78,6 +122,7 @@ public class BookingService {
                 .email(booking.getEmail())
                 .phoneNumber(booking.getPhoneNumber())
                 .paymentMethod(booking.getPaymentMethod())
+                .paymentAmount(booking.getPaymentAmount())
                 .bookingDate(booking.getBookingDate())
                 .checkinDate(booking.getCheckinDate())
                 .checkoutDate(booking.getCheckoutDate())
